@@ -1,0 +1,70 @@
+{
+  "common": {
+    "appName": "OfficeKit",
+    "tagline": "Office equipment, sourced",
+    "cta": {
+      "start": "Start your office",
+      "continue": "Continue",
+      "back": "Back",
+      "requestQuotes": "Request 3 quotes",
+      "skipFloorPlan": "Skip floor plan"
+    },
+    "vat": "VAT"
+  },
+  "landing": {
+    "headline": "Outfit your new office in one form.",
+    "subhead": "Tell us what you need. We send your list to three vetted Swedish suppliers — new and second-hand. Compare quotes side by side. Pick the best one. Done.",
+    "stats": { "setupTime": "Avg. setup time", "suppliers": "Suppliers in network", "reuseShare": "Reused furniture share" }
+  },
+  "industry": {
+    "title": "Built for the way your team actually works.",
+    "subhead": "Pick your industry. We'll preset the right equipment, compliance flags, and supplier shortlist — then send your list to three vetted partners. New, refurbished, or both.",
+    "avgSpend": "Avg. spend / seat",
+    "reuseShare": "Reuse share",
+    "setupTime": "Setup time"
+  },
+  "project": {
+    "basicsTitle": "Project basics",
+    "headcount": "Headcount",
+    "city": "City",
+    "moveInDate": "Expected move-in date"
+  },
+  "checklist": {
+    "tabs": {
+      "workstations": "Workstations",
+      "tech": "Tech & AV",
+      "meeting": "Meeting rooms",
+      "storage": "Storage & security",
+      "lounge": "Lounge & client",
+      "kitchen": "Kitchen & break"
+    },
+    "summary": {
+      "title": "Your list",
+      "itemsSelected": "Items selected",
+      "newUnits": "New units",
+      "usedUnits": "Reused units",
+      "estVat": "Estimated VAT (25%)",
+      "total": "Total est."
+    },
+    "modes": { "new": "New", "used": "Reused" }
+  },
+  "floorplan": {
+    "title": "Your floor plan",
+    "subhead": "Drag items from the palette onto the canvas. Click to select and delete.",
+    "skip": "Skip floor plan"
+  },
+  "request": {
+    "title": "Request 3 quotes",
+    "subhead": "We'll send your spec to three vetted suppliers. Expect a response within 3–4 business hours.",
+    "emailLabel": "Your email address",
+    "send": "Send to 3 suppliers"
+  },
+  "confirmation": {
+    "title": "Quote request sent",
+    "subhead": "Project ID:",
+    "next": "What happens next",
+    "step1": "Suppliers confirm receipt",
+    "step2": "Quotes delivered within 3–4 hours",
+    "step3": "You compare and pick"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "common": {
+    "appName": "OfficeKit",
+    "tagline": "Office equipment, sourced",
+    "cta": {
+      "start": "Starta ditt kontor",
+      "continue": "Fortsätt",
+      "back": "Tillbaka",
+      "requestQuotes": "Begär 3 offerter",
+      "skipFloorPlan": "Hoppa över planritning"
+    },
+    "vat": "moms"
+  },
+  "landing": {
+    "headline": "Inred ditt nya kontor på en formulär.",
+    "subhead": "Berätta vad du behöver. Vi skickar din lista till tre vetted svenska leverantörer — nya och begagnade. Jämför offerter sida vid sida. Välj den bästa. Klart.",
+    "stats": { "setupTime": "Genomsnittlig uppstartstid", "suppliers": "Leverantörer i nätverket", "reuseShare": "Andel begagnat" }
+  },
+  "industry": {
+    "title": "Byggt för hur ditt team faktiskt arbetar.",
+    "subhead": "Välj din bransch. Vi förinställer rätt utrustning, regelflaggor och leverantörsurval — och skickar din lista till tre vetted partners. Nytt, renoverat eller båda.",
+    "avgSpend": "Genomsnittligt pris/plats",
+    "reuseShare": "Andel återbrukat",
+    "setupTime": "Uppstartstid"
+  },
+  "project": {
+    "basicsTitle": "Projektets grunder",
+    "headcount": "Antal anställda",
+    "city": "Stad",
+    "moveInDate": "Önskat inflyttningsdatum"
+  },
+  "checklist": {
+    "tabs": {
+      "workstations": "Arbetsplatser",
+      "tech": "Teknik & AV",
+      "meeting": "Mötesrum",
+      "storage": "Förvaring & säkerhet",
+      "lounge": "Lounge & klient",
+      "kitchen": "Kök & pausrum"
+    },
+    "summary": {
+      "title": "Din lista",
+      "itemsSelected": "Valda artiklar",
+      "newUnits": "Nya enheter",
+      "usedUnits": "Begagnade enheter",
+      "estVat": "Beräknad moms (25%)",
+      "total": "Total uppskattning"
+    },
+    "modes": { "new": "Nytt", "used": "Begagnat" }
+  },
+  "floorplan": {
+    "title": "Din planritning",
+    "subhead": "Dra artiklar från listan till ytan. Klicka för att markera och radera.",
+    "skip": "Hoppa över planritning"
+  },
+  "request": {
+    "title": "Begär 3 offerter",
+    "subhead": "Vi skickar din specifikation till tre vetted leverantörer. Förväntat svar inom 3–4 timmar under arbetstid.",
+    "emailLabel": "Din e-postadress",
+    "send": "Skicka till 3 leverantörer"
+  },
+  "confirmation": {
+    "title": "Offertförfrågan skickad",
+    "subhead": "Projekt-ID:",
+    "next": "Vad händer härnäst",
+    "step1": "Leverantörerna bekräftar mottagandet",
+    "step2": "Offerter levereras inom 3–4 timmar",
+    "step3": "Du jämför och väljer"
+  }
+}
