@@ -1,0 +1,319 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  buyer
+  supplier
+  admin
+}
+
+enum Locale {
+  sv
+  en
+}
+
+enum Industry {
+  it
+  finance
+  sales
+  law
+}
+
+enum ItemCategory {
+  workstations
+  tech
+  meeting
+  storage
+  lounge
+  kitchen
+}
+
+enum ItemMode {
+  new
+  used
+}
+
+enum ProjectStatus {
+  draft
+  requesting_quotes
+  quotes_received
+  ordered
+  closed
+}
+
+enum RfqStatus {
+  sent
+  viewed
+  quoted
+  won
+  lost
+  expired
+}
+
+enum OrderStatus {
+  confirmed
+  in_production
+  shipped
+  delivered
+  paid
+  cancelled
+}
+
+enum PaymentMethod {
+  card
+  klarna_invoice
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  name            String?
+  phone           String?
+  role            Role     @default(buyer)
+  passwordHash    String?  @map("password_hash")
+  twoFaEnabled    Boolean  @default(false) @map("two_fa_enabled")
+  locale          Locale   @default(sv)
+  emailVerified   DateTime? @map("email_verified")
+  supplierId      String?  @map("supplier_id")
+  supplier        Supplier? @relation(fields: [supplierId], references: [id])
+  companies       Company[]
+  projects        Project[]
+  accounts        Account[]
+  sessions        Session[]
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Company {
+  id                String   @id @default(uuid())
+  name              String
+  orgNumber         String?  @map("org_number")
+  address           Json?
+  createdByUserId   String?  @map("created_by_user_id")
+  createdByUser     User?    @relation(fields: [createdByUserId], references: [id])
+  claimToken        String?  @unique @map("claim_token")
+  projects          Project[]
+  orders            Order[]
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("companies")
+}
+
+model Supplier {
+  id                String   @id @default(uuid())
+  name              String
+  legalName         String   @map("legal_name")
+  orgNumber         String   @map("org_number")
+  stripeAccountId   String?  @map("stripe_account_id")
+  coverageAreas     String[] @map("coverage_areas")
+  verticals         String[]
+  commissionRate    Decimal  @default(0.060) @map("commission_rate") @db.Decimal(4, 3)
+  active            Boolean  @default(true)
+  logoUrl           String?  @map("logo_url")
+  shortDescription  String?  @map("short_description")
+  perks             String[]
+  usedShare         Decimal  @default(0.0) @map("used_share") @db.Decimal(3, 2)
+  users             User[]
+  pricing           SupplierPricing[]
+  rfqs              Rfq[]
+  orders            Order[]
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("suppliers")
+}
+
+model ItemCatalog {
+  id                String       @id
+  category          ItemCategory
+  name              String
+  description       String?
+  icon              String?
+  widthCells        Int          @map("width_cells")
+  heightCells       Int          @map("height_cells")
+  tags              String[]
+  priceNewDefault   Int          @map("price_new_default")
+  priceUsedDefault  Int?         @map("price_used_default")
+  presets           Json
+  projectItems      ProjectItem[]
+  supplierPricing   SupplierPricing[]
+  quoteLines        QuoteLine[]
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  @@map("item_catalog")
+}
+
+model SupplierPricing {
+  id            String   @id @default(uuid())
+  supplierId    String   @map("supplier_id")
+  itemId        String   @map("item_id")
+  priceNew      Int?     @map("price_new")
+  priceUsed     Int?     @map("price_used")
+  leadTimeDays  Int      @map("lead_time_days")
+  available     Boolean  @default(true)
+  supplier      Supplier @relation(fields: [supplierId], references: [id])
+  item          ItemCatalog @relation(fields: [itemId], references: [id])
+
+  @@unique([supplierId, itemId])
+  @@map("supplier_pricing")
+}
+
+model Project {
+  id                String        @id @default(uuid())
+  companyId         String        @map("company_id")
+  createdByUserId   String?       @map("created_by_user_id")
+  claimToken        String?       @unique @map("claim_token")
+  name              String
+  industry          Industry
+  headcount         Int
+  city              String
+  moveInDate        DateTime?     @map("move_in_date") @db.Date
+  status            ProjectStatus @default(draft)
+  floorPlanData     Json?         @map("floor_plan_data")
+  company           Company       @relation(fields: [companyId], references: [id])
+  createdByUser     User?         @relation(fields: [createdByUserId], references: [id])
+  items             ProjectItem[]
+  rfqs              Rfq[]
+  orders            Order[]
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  @@index([claimToken])
+  @@map("projects")
+}
+
+model ProjectItem {
+  id                  String   @id @default(uuid())
+  projectId           String   @map("project_id")
+  itemId              String   @map("item_id")
+  quantity            Int
+  mode                ItemMode
+  placedOnFloorPlan   Boolean  @default(false) @map("placed_on_floor_plan")
+  project             Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  item                ItemCatalog @relation(fields: [itemId], references: [id])
+
+  @@unique([projectId, itemId])
+  @@map("project_items")
+}
+
+model Rfq {
+  id           String     @id @default(uuid())
+  projectId    String     @map("project_id")
+  supplierId   String     @map("supplier_id")
+  status       RfqStatus  @default(sent)
+  sentAt       DateTime   @default(now()) @map("sent_at")
+  viewedAt     DateTime?  @map("viewed_at")
+  quotedAt     DateTime?  @map("quoted_at")
+  decidedAt    DateTime?  @map("decided_at")
+  deadlineAt   DateTime   @map("deadline_at")
+  project      Project    @relation(fields: [projectId], references: [id])
+  supplier     Supplier   @relation(fields: [supplierId], references: [id])
+  quote        Quote?
+
+  @@unique([projectId, supplierId])
+  @@map("rfqs")
+}
+
+model Quote {
+  id                String   @id @default(uuid())
+  rfqId             String   @unique @map("rfq_id")
+  totalAmount       Int      @map("total_amount")
+  totalAmountExVat  Int      @map("total_amount_ex_vat")
+  validUntil        DateTime @map("valid_until") @db.Date
+  notes             String?
+  perks             String[]
+  rfq               Rfq      @relation(fields: [rfqId], references: [id])
+  lines             QuoteLine[]
+  order             Order?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("quotes")
+}
+
+model QuoteLine {
+  id          String   @id @default(uuid())
+  quoteId     String   @map("quote_id")
+  itemId      String   @map("item_id")
+  quantity    Int
+  mode        ItemMode
+  unitPrice   Int      @map("unit_price")
+  lineTotal   Int      @map("line_total")
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  item        ItemCatalog @relation(fields: [itemId], references: [id])
+
+  @@map("quote_lines")
+}
+
+model Order {
+  id                      String        @id @default(uuid())
+  projectId               String        @map("project_id")
+  quoteId                 String        @unique @map("quote_id")
+  supplierId              String        @map("supplier_id")
+  companyId               String        @map("company_id")
+  status                  OrderStatus   @default(confirmed)
+  totalAmount             Int           @map("total_amount")
+  commissionAmount        Int           @map("commission_amount")
+  payoutAmount            Int           @map("payout_amount")
+  deliveryAddress         Json          @map("delivery_address")
+  deliveryWindowStart     DateTime      @map("delivery_window_start") @db.Date
+  deliveryWindowEnd       DateTime      @map("delivery_window_end") @db.Date
+  paymentMethod           PaymentMethod @map("payment_method")
+  stripePaymentIntentId   String?       @map("stripe_payment_intent_id")
+  stripeTransferId        String?       @map("stripe_transfer_id")
+  project                 Project       @relation(fields: [projectId], references: [id])
+  quote                   Quote         @relation(fields: [quoteId], references: [id])
+  supplier                Supplier      @relation(fields: [supplierId], references: [id])
+  company                 Company       @relation(fields: [companyId], references: [id])
+  createdAt               DateTime      @default(now()) @map("created_at")
+  updatedAt               DateTime      @updatedAt @map("updated_at")
+
+  @@map("orders")
+}
