@@ -77,6 +77,10 @@ model User {
   role            Role     @default(buyer)
   passwordHash    String?  @map("password_hash")
   twoFaEnabled    Boolean  @default(false) @map("two_fa_enabled")
+  twoFaSecret         String?   @map("two_fa_secret")
+  twoFaRecoveryCodes  String[]  @default([]) @map("two_fa_recovery_codes")
+  onboardingToken     String?   @unique @map("onboarding_token")
+  onboardingExpiresAt DateTime? @map("onboarding_expires_at")
   locale          Locale   @default(sv)
   emailVerified   DateTime? @map("email_verified")
   supplierId      String?  @map("supplier_id")
@@ -269,6 +273,7 @@ model Quote {
   validUntil        DateTime @map("valid_until") @db.Date
   notes             String?
   perks             String[]
+  submittedAt         DateTime? @map("submitted_at")
   rfq               Rfq      @relation(fields: [rfqId], references: [id])
   lines             QuoteLine[]
   order             Order?
