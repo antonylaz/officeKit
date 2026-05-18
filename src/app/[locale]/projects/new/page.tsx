@@ -31,7 +31,7 @@ export default function NewProjectPage() {
       }),
     });
     if (!res.ok) {
-      setError("Couldn't create project. Please check your input.");
+      setError(t("project.errors.createFailed"));
       setSubmitting(false);
       return;
     }
@@ -43,7 +43,7 @@ export default function NewProjectPage() {
     <div data-industry={industry} style={{ maxWidth: 560, margin: "0 auto", padding: "64px 32px" }}>
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: 40 }}>{t("project.basicsTitle")}</h1>
       <form onSubmit={onSubmit} style={{ marginTop: 32, display: "grid", gap: 24 }}>
-        <Field label="Company name" name="companyName" required />
+        <Field label={t("project.companyName")} name="companyName" required />
         <Field label={t("project.headcount")} name="headcount" type="number" min={1} max={500} required />
         <label style={{ display: "grid", gap: 6 }}>
           <span style={{ fontSize: 13, color: "var(--color-ink-mute)" }}>{t("project.city")}</span>

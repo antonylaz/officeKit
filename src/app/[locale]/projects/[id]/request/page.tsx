@@ -4,6 +4,7 @@ import { computeSummary } from "@/server/project-summary";
 import { RequestForm } from "@/components/buyer/RequestForm";
 import { formatSek } from "@/lib/money";
 import { getTranslations } from "next-intl/server";
+import { INDUSTRIES } from "@/lib/presets";
 
 export default async function RequestPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,16 +12,17 @@ export default async function RequestPage({ params }: { params: Promise<{ id: st
   if (!project) notFound();
   const summary = computeSummary(project.items);
   const t = await getTranslations();
+  const industryLabel = INDUSTRIES.find((i) => i.id === project.industry)?.label ?? project.industry;
   return (
     <div data-industry={project.industry} style={{ maxWidth: 720, margin: "0 auto", padding: "64px 32px" }}>
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: 48 }}>{t("request.title")}</h1>
       <p style={{ marginTop: 16, color: "var(--color-ink-soft)" }}>{t("request.subhead")}</p>
       <dl style={{ marginTop: 32, display: "grid", gap: 12, fontSize: 14 }}>
-        <Row k="Industry" v={project.industry} />
-        <Row k="Headcount" v={String(project.headcount)} />
-        <Row k="Location" v={project.city} />
-        <Row k="Items" v={String(summary.itemsSelected)} />
-        <Row k="Estimated total" v={formatSek(summary.totalOre)} />
+        <Row k={t("request.summary.industry")} v={industryLabel} />
+        <Row k={t("request.summary.headcount")} v={String(project.headcount)} />
+        <Row k={t("request.summary.location")} v={project.city} />
+        <Row k={t("request.summary.items")} v={String(summary.itemsSelected)} />
+        <Row k={t("request.summary.estimatedTotal")} v={formatSek(summary.totalOre)} />
       </dl>
       <RequestForm projectId={id} />
     </div>

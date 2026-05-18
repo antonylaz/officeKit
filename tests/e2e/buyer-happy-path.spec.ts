@@ -16,8 +16,8 @@ test("buyer can go from landing through floor plan to request page", async ({ pa
 
   // --- New-project form ---
   await expect(page).toHaveURL(/\/sv\/projects\/new/);
-  // "Company name" is hardcoded English in the Field label
-  await page.getByLabel(/company name/i).fill("Acme Advokatbyrå");
+  // "Företagsnamn" is the Swedish translation of project.companyName
+  await page.getByLabel(/företagsnamn/i).fill("Acme Advokatbyrå");
   // Headcount label is the Swedish translation: "Antal anställda"
   await page.getByLabel(/antal anställda/i).fill("12");
   // City is a <select> with label "Stad" (Swedish for city)
@@ -29,13 +29,13 @@ test("buyer can go from landing through floor plan to request page", async ({ pa
   await expect(page).toHaveURL(/\/checklist$/);
   // SummarySidebar shows "Total uppskattning" (checklist.summary.total)
   await expect(page.getByText(/total uppskattning/i)).toBeVisible();
-  // The continue link text is "Fortsätt →" — it goes to /floorplan
-  await page.getByRole("link", { name: /fortsätt/i }).click();
+  // The continue link text is "Fortsätt till planritning →" — it goes to /floorplan
+  await page.getByRole("link", { name: /fortsätt till planritning/i }).click();
 
   // --- Floor plan page ---
   await expect(page).toHaveURL(/\/floorplan$/);
-  // The "Request 3 quotes" link text is hardcoded English in FloorPlanView
-  await page.getByRole("link", { name: /request 3 quotes/i }).click();
+  // The "Request quotes" link text is now the Swedish translation "Begär 3 offerter →"
+  await page.getByRole("link", { name: /begär 3 offerter/i }).click();
 
   // --- Request page ---
   await expect(page).toHaveURL(/\/request$/);

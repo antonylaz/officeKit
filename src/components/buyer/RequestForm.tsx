@@ -24,7 +24,7 @@ export function RequestForm({ projectId }: { projectId: string }) {
   }
 
   if (state === "magic_sent") {
-    return <p style={{ marginTop: 32, color: "var(--color-forest)" }}>Check your inbox — we sent a sign-in link to {email}. Click it to finish sending the request.</p>;
+    return <p style={{ marginTop: 32, color: "var(--color-forest)" }}>{t("request.form.magicSentPrefix")}{email}{t("request.form.magicSentSuffix")}</p>;
   }
 
   return (
@@ -42,7 +42,7 @@ export function RequestForm({ projectId }: { projectId: string }) {
       <button type="submit" disabled={state === "sending"} style={{ background: "var(--color-terracotta)", color: "white", padding: "16px 24px", textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, fontWeight: 600, border: "none", borderRadius: 4, cursor: "pointer" }}>
         {state === "sending" ? "…" : `${t("request.send")} →`}
       </button>
-      {state === "error" && <p style={{ color: "var(--color-terracotta)" }}>Something went wrong. Try again.</p>}
+      {state === "error" && <p style={{ color: "var(--color-terracotta)" }}>{t("request.form.error")}</p>}
     </form>
   );
 }

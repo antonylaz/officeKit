@@ -6,7 +6,7 @@
       "start": "Start your office",
       "continue": "Continue",
       "back": "Back",
-      "requestQuotes": "Request 3 quotes",
+      "requestQuotes": "Request 3 quotes →",
       "skipFloorPlan": "Skip floor plan"
     },
     "vat": "VAT"
@@ -21,13 +21,23 @@
     "subhead": "Pick your industry. We'll preset the right equipment, compliance flags, and supplier shortlist — then send your list to three vetted partners. New, refurbished, or both.",
     "avgSpend": "Avg. spend / seat",
     "reuseShare": "Reuse share",
-    "setupTime": "Setup time"
+    "setupTime": "Setup time",
+    "labels": {
+      "it": "IT & Tech",
+      "finance": "Finance & Economic",
+      "sales": "Sales & Commercial",
+      "law": "Law Firms"
+    }
   },
   "project": {
     "basicsTitle": "Project basics",
     "headcount": "Headcount",
     "city": "City",
-    "moveInDate": "Expected move-in date"
+    "moveInDate": "Expected move-in date",
+    "companyName": "Company name",
+    "errors": {
+      "createFailed": "Couldn't create project. Please check your input."
+    }
   },
   "checklist": {
     "tabs": {
@@ -44,9 +54,10 @@
       "newUnits": "New units",
       "usedUnits": "Reused units",
       "estVat": "Estimated VAT (25%)",
-      "total": "Total est."
+      "total": "Total est.",
+      "cityPrefix": "Your office in"
     },
-    "modes": { "new": "New", "used": "Reused" }
+    "continueToFloorplan": "Continue to floor plan →"
   },
   "floorplan": {
     "title": "Your floor plan",
@@ -57,7 +68,19 @@
     "title": "Request 3 quotes",
     "subhead": "We'll send your spec to three vetted suppliers. Expect a response within 3–4 business hours.",
     "emailLabel": "Your email address",
-    "send": "Send to 3 suppliers"
+    "send": "Send to 3 suppliers",
+    "summary": {
+      "industry": "Industry",
+      "headcount": "Headcount",
+      "location": "Location",
+      "items": "Items",
+      "estimatedTotal": "Estimated total"
+    },
+    "form": {
+      "magicSentPrefix": "Check your inbox — we sent a sign-in link to ",
+      "magicSentSuffix": ". Click it to finish sending the request.",
+      "error": "Something went wrong. Try again."
+    }
   },
   "confirmation": {
     "title": "Quote request sent",
@@ -66,5 +89,15 @@
     "step1": "Suppliers confirm receipt",
     "step2": "Quotes delivered within 3–4 hours",
     "step3": "You compare and pick"
+  },
+  "footer": {
+    "privacyPolicy": "Privacy policy",
+    "partners": "Partners"
+  },
+  "orders": {
+    "empty": {
+      "title": "No orders yet",
+      "body": "Your placed orders will appear here once you accept a quote."
+    }
   }
 }

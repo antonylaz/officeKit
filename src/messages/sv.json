@@ -6,7 +6,7 @@
       "start": "Starta ditt kontor",
       "continue": "Fortsätt",
       "back": "Tillbaka",
-      "requestQuotes": "Begär 3 offerter",
+      "requestQuotes": "Begär 3 offerter →",
       "skipFloorPlan": "Hoppa över planritning"
     },
     "vat": "moms"
@@ -21,13 +21,23 @@
     "subhead": "Välj din bransch. Vi förinställer rätt utrustning, regelflaggor och leverantörsurval — och skickar din lista till tre vetted partners. Nytt, renoverat eller båda.",
     "avgSpend": "Genomsnittligt pris/plats",
     "reuseShare": "Andel återbrukat",
-    "setupTime": "Uppstartstid"
+    "setupTime": "Uppstartstid",
+    "labels": {
+      "it": "IT & Tech",
+      "finance": "Ekonomi",
+      "sales": "Försäljning & Handel",
+      "law": "Advokatbyrå"
+    }
   },
   "project": {
     "basicsTitle": "Projektets grunder",
     "headcount": "Antal anställda",
     "city": "Stad",
-    "moveInDate": "Önskat inflyttningsdatum"
+    "moveInDate": "Önskat inflyttningsdatum",
+    "companyName": "Företagsnamn",
+    "errors": {
+      "createFailed": "Det gick inte att skapa projektet. Kontrollera dina uppgifter."
+    }
   },
   "checklist": {
     "tabs": {
@@ -44,9 +54,10 @@
       "newUnits": "Nya enheter",
       "usedUnits": "Begagnade enheter",
       "estVat": "Beräknad moms (25%)",
-      "total": "Total uppskattning"
+      "total": "Total uppskattning",
+      "cityPrefix": "Ditt kontor i"
     },
-    "modes": { "new": "Nytt", "used": "Begagnat" }
+    "continueToFloorplan": "Fortsätt till planritning →"
   },
   "floorplan": {
     "title": "Din planritning",
@@ -57,7 +68,19 @@
     "title": "Begär 3 offerter",
     "subhead": "Vi skickar din specifikation till tre vetted leverantörer. Förväntat svar inom 3–4 timmar under arbetstid.",
     "emailLabel": "Din e-postadress",
-    "send": "Skicka till 3 leverantörer"
+    "send": "Skicka till 3 leverantörer",
+    "summary": {
+      "industry": "Bransch",
+      "headcount": "Antal anställda",
+      "location": "Plats",
+      "items": "Antal artiklar",
+      "estimatedTotal": "Uppskattat totalpris"
+    },
+    "form": {
+      "magicSentPrefix": "Kolla din inkorg — vi har skickat en inloggningslänk till ",
+      "magicSentSuffix": ". Klicka för att slutföra begäran.",
+      "error": "Något gick fel. Försök igen."
+    }
   },
   "confirmation": {
     "title": "Offertförfrågan skickad",
@@ -66,5 +89,15 @@
     "step1": "Leverantörerna bekräftar mottagandet",
     "step2": "Offerter levereras inom 3–4 timmar",
     "step3": "Du jämför och väljer"
+  },
+  "footer": {
+    "privacyPolicy": "Integritetspolicy",
+    "partners": "Partners"
+  },
+  "orders": {
+    "empty": {
+      "title": "Inga ordrar än",
+      "body": "Dina ordrar visas här när du har accepterat en offert."
+    }
   }
 }

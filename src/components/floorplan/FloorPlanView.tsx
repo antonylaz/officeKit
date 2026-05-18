@@ -8,12 +8,14 @@ import { Canvas } from "./Canvas";
 import { Palette } from "./Palette";
 import { getRoomsForIndustry } from "@/lib/room-presets";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 const CELL_PX = 32;
 
 type ProjectWithItems = Project & { items: (ProjectItem & { item: ItemCatalog })[] };
 
 export function FloorPlanView({ project }: { project: ProjectWithItems }) {
+  const t = useTranslations();
   const initialPlaced: PlacedItem[] = useMemo(() => {
     const fp = (project.floorPlanData as { placed_items?: Array<{ uid?: number; item_id: string; x: number; y: number; mode?: "new" | "used" }> } | null) ?? {};
     return (fp.placed_items ?? []).map((p, idx) => ({ uid: p.uid ?? idx + 1, itemId: p.item_id, x: p.x, y: p.y, mode: p.mode ?? "new" }));
@@ -59,7 +61,7 @@ export function FloorPlanView({ project }: { project: ProjectWithItems }) {
 
   return (
     <DndContext modifiers={[restrictToParentElement]} onDragEnd={onDragEnd}>
-      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 32, maxWidth: 1280, margin: "0 auto", padding: 32 }}>
+      <div data-industry={project.industry} style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 32, maxWidth: 1280, margin: "0 auto", padding: 32 }}>
         <Palette projectItems={project.items} placed={state.placed} />
         <div>
           <Canvas state={state} rooms={rooms} cellPx={CELL_PX} catalog={project.items.map((i) => i.item)} dispatch={dispatch} />
@@ -67,7 +69,7 @@ export function FloorPlanView({ project }: { project: ProjectWithItems }) {
             href={`/projects/${project.id}/request`}
             style={{ display: "inline-block", marginTop: 24, padding: "16px 24px", background: "var(--ok-accent)", color: "white", textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, fontWeight: 600, borderRadius: 4, textDecoration: "none" }}
           >
-            Request 3 quotes →
+            {t("common.cta.requestQuotes")}
           </Link>
         </div>
       </div>

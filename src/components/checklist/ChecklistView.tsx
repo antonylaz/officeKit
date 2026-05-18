@@ -99,7 +99,7 @@ export function ChecklistView({
           href={`/projects/${project.id}/floorplan`}
           style={{ display: "block", textAlign: "center", marginTop: 16, padding: 16, background: "var(--ok-accent)", color: "white", textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, fontWeight: 600, textDecoration: "none", borderRadius: 4 }}
         >
-          {t("common.cta.continue")} →
+          {t("checklist.continueToFloorplan")}
         </Link>
       </div>
     </div>

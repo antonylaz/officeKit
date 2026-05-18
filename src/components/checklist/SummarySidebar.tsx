@@ -7,7 +7,7 @@ export function SummarySidebar({ summary, city }: { summary: ProjectSummary; cit
   const t = useTranslations("checklist.summary");
   return (
     <aside style={{ border: "1px solid var(--color-line)", borderRadius: 4, padding: 32, background: "var(--color-paper)" }}>
-      <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-ink-mute)" }}>Your office in</p>
+      <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-ink-mute)" }}>{t("cityPrefix")}</p>
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: 32, marginTop: 8 }}>{city}, SE</h2>
       <dl style={{ marginTop: 24, display: "grid", gap: 12, fontSize: 14 }}>
         <Row k={t("itemsSelected")} v={String(summary.itemsSelected)} />
