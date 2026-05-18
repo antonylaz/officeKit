@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OfficeKit
 
-## Getting Started
+Swedish responsive web marketplace for outfitting offices via vetted suppliers.
 
-First, run the development server:
+A buyer picks their industry, specifies headcount, gets a smart starter list of furniture and equipment, refines the list, lays items on a floor plan, and requests quotes from three vetted suppliers. See `docs/superpowers/specs/2026-05-15-officekit-phase-0-1-2-design.md` for the design and `docs/superpowers/plans/2026-05-15-officekit-phase-0-1-2.md` for the implementation plan.
+
+## Quickstart
+
+Requires Node 22+ (`.nvmrc` pins to `22`) and Docker.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# 1. Start Postgres
+docker compose up -d
+
+# 2. Install deps
+pnpm install
+
+# 3. Configure env
+cp .env.example .env.local
+# Generate AUTH_SECRET and paste it into .env.local:
+openssl rand -base64 32
+
+# 4. Migrate + seed
+pnpm prisma migrate deploy
+pnpm db:seed
+
+# 5. Run
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000/sv
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What |
+|--------|------|
+| `pnpm dev` | Dev server (Next.js 16) |
+| `pnpm build` | Production build |
+| `pnpm test` | Vitest unit tests |
+| `pnpm test:e2e` | Playwright E2E |
+| `pnpm typecheck` | TypeScript check |
+| `pnpm lint` | ESLint |
+| `pnpm db:migrate` | Apply pending migrations |
+| `pnpm db:seed` | Seed catalog + suppliers + admin |
+| `pnpm db:studio` | Prisma Studio GUI |
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js 16 App Router, TypeScript strict
+- Prisma 7 + PostgreSQL 16 (via Docker Compose or Supabase in prod)
+- NextAuth v5 (magic-link via Resend)
+- next-intl 3 (Swedish default, English fallback)
+- TanStack Query 5 for client-side mutations
+- dnd-kit for floor plan
+- Vitest + Playwright
+- shadcn/ui + Tailwind v4
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See `docs/superpowers/specs/2026-05-15-officekit-phase-0-1-2-design.md` for the full design.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Phase 0+1+2 status
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This codebase implements Phase 0 (foundations), Phase 1 (buyer happy path through quote-request stub), and Phase 2 (floor plan). Subsequent phases — supplier dashboard, payments, admin tools — are not yet built.
