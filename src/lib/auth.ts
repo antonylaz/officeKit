@@ -10,7 +10,6 @@ const resend = new ResendClient(process.env.RESEND_API_KEY!);
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: "database" },
-  pages: { signIn: "/sv/login", verifyRequest: "/sv/login/check-email" },
   providers: [
     Resend({
       from: process.env.RESEND_FROM_EMAIL!,

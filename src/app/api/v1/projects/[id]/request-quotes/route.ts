@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth, signIn } from "@/lib/auth";
 import { fanoutRfqs } from "@/server/rfq-fanout";
 import { getAuthorizedProject } from "@/server/projects";
+import { db } from "@/lib/db";
 import { Resend } from "resend";
 import { QuoteRequestConfirmationEmail } from "@/emails/QuoteRequestConfirmation";
 
@@ -21,6 +22,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       return NextResponse.json({ error: "email_required" }, { status: 401 });
     }
     await signIn("resend", { email: parsed.data.email, redirectTo: `/sv/projects/${id}/confirmation`, redirect: false });
+    await db.project.update({ where: { id }, data: { status: "requesting_quotes" } });
     return NextResponse.json({ status: "magic_link_sent" });
   }
 
