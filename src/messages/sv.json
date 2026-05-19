@@ -99,5 +99,37 @@
       "title": "Inga ordrar än",
       "body": "Dina ordrar visas här när du har accepterat en offert."
     }
+  },
+  "supplier": {
+    "inbox": {
+      "title": "Offertförfrågningar",
+      "totalRequests": "förfrågningar",
+      "empty": "Inga förfrågningar matchar detta filter.",
+      "closesIn": "Stänger om",
+      "filter_all": "Alla",
+      "filter_sent": "Skickade",
+      "filter_viewed": "Visade",
+      "filter_quoted": "Offerterade",
+      "filter_won": "Vunna",
+      "filter_lost": "Förlorade",
+      "filter_expired": "Utgångna"
+    },
+    "rfq": {
+      "competitorsLabel": "konkurrerande offerter",
+      "people": "personer",
+      "deadline": "Deadline:",
+      "builderTitle": "Din offert",
+      "notes": "Noteringar",
+      "perks": "Förmåner",
+      "addPerk": "Lägg till förmån…",
+      "totals": "Summering",
+      "subtotal": "Delsumma",
+      "vat": "Moms (25%)",
+      "total": "Totalt",
+      "savedAt": "Utkast sparat",
+      "submitted": "Offert skickad",
+      "saveDraft": "Spara utkast",
+      "submitQuote": "Skicka offert"
+    }
   }
 }

@@ -99,5 +99,37 @@
       "title": "No orders yet",
       "body": "Your placed orders will appear here once you accept a quote."
     }
+  },
+  "supplier": {
+    "inbox": {
+      "title": "RFQ Inbox",
+      "totalRequests": "requests",
+      "empty": "No RFQs match this filter.",
+      "closesIn": "Closes in",
+      "filter_all": "All",
+      "filter_sent": "Sent",
+      "filter_viewed": "Viewed",
+      "filter_quoted": "Quoted",
+      "filter_won": "Won",
+      "filter_lost": "Lost",
+      "filter_expired": "Expired"
+    },
+    "rfq": {
+      "competitorsLabel": "competing quotes",
+      "people": "people",
+      "deadline": "Deadline:",
+      "builderTitle": "Your Quote",
+      "notes": "Notes",
+      "perks": "Perks",
+      "addPerk": "Add perk…",
+      "totals": "Totals",
+      "subtotal": "Subtotal",
+      "vat": "VAT (25%)",
+      "total": "Total",
+      "savedAt": "Draft saved at",
+      "submitted": "Quote submitted",
+      "saveDraft": "Save draft",
+      "submitQuote": "Submit quote"
+    }
   }
 }
