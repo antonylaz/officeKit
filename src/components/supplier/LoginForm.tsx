@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
-export function LoginForm() {
+export function LoginForm({ defaultRedirect = "/supplier" }: { defaultRedirect?: string } = {}) {
   const t = useTranslations("supplier.login");
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -27,7 +27,7 @@ export function LoginForm() {
       setSubmitting(false);
       return;
     }
-    router.push("/supplier");
+    router.push(defaultRedirect);
   }
 
   return (

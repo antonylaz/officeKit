@@ -42,7 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!email || !password) return null;
 
         const user = await db.user.findFirst({
-          where: { email, role: "supplier" },
+          where: { email, role: { in: ["supplier", "admin"] } },
         });
         if (!user || !user.passwordHash) return null;
         if (!(await verifyPassword(password, user.passwordHash))) return null;

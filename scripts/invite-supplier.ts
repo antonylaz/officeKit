@@ -46,26 +46,39 @@ async function main() {
   const email = args.email?.toLowerCase();
   const supplierId = args["supplier-id"];
   const name = args.name;
-  if (!email || !supplierId) {
-    console.error("Usage: pnpm tsx scripts/invite-supplier.ts --email <addr> --supplier-id <uuid> [--name <name>]");
+  const role = (args.role as "supplier" | "admin" | undefined) ?? "supplier";
+
+  if (!email) {
+    console.error("Usage: pnpm tsx scripts/invite-supplier.ts --email <addr> [--supplier-id <uuid>] [--role supplier|admin] [--name <name>]");
     process.exit(1);
   }
-  const supplier = await db.supplier.findUnique({ where: { id: supplierId } });
-  if (!supplier) {
+
+  if (role === "supplier" && !supplierId) {
+    console.error("--supplier-id required for role=supplier");
+    process.exit(1);
+  }
+
+  const supplier = role === "supplier"
+    ? await db.supplier.findUnique({ where: { id: supplierId! } })
+    : null;
+  if (role === "supplier" && !supplier) {
     console.error(`Supplier ${supplierId} not found`);
     process.exit(1);
   }
+
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   await db.user.upsert({
     where: { email },
-    create: { email, name, role: "supplier", supplierId, onboardingToken: token, onboardingExpiresAt: expiresAt },
-    update: { name, role: "supplier", supplierId, onboardingToken: token, onboardingExpiresAt: expiresAt },
+    create: { email, name, role, supplierId: role === "supplier" ? supplierId : null, onboardingToken: token, onboardingExpiresAt: expiresAt },
+    update: { name, role, supplierId: role === "supplier" ? supplierId : null, onboardingToken: token, onboardingExpiresAt: expiresAt },
   });
 
   const url = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/sv/supplier/onboarding/${token}`;
   console.log(`\nOnboarding link (also emailed to ${email}):\n${url}\n`);
+
+  const inviteName = supplier?.name ?? "OfficeKit Admin";
 
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
@@ -76,7 +89,7 @@ async function main() {
         from,
         to: email,
         subject: "Aktivera ditt OfficeKit-konto",
-        react: SupplierInviteEmail({ url, supplierName: supplier.name, locale: "sv" }),
+        react: SupplierInviteEmail({ url, supplierName: inviteName, locale: "sv" }),
       });
       console.log("Email sent.");
     } catch (e) {
