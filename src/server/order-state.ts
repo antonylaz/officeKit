@@ -6,7 +6,7 @@ const ALLOWED: Record<OrderStatus, OrderStatus[]> = {
   confirmed: ["in_production"],
   in_production: ["shipped"],
   shipped: ["delivered"],
-  delivered: [],
+  delivered: ["paid"],
   paid: [],
   cancelled: [],
 };

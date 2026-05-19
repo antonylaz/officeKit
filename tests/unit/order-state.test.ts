@@ -28,6 +28,14 @@ describe("order state machine", () => {
     expect(canTransitionStatus("cancelled", "in_production")).toBe(false);
   });
 
+  it("allows delivered → paid (payout transfer)", () => {
+    expect(canTransitionStatus("delivered", "paid")).toBe(true);
+  });
+
+  it("rejects paid → anything", () => {
+    expect(canTransitionStatus("paid", "delivered")).toBe(false);
+  });
+
   it("isWithinCancelWindow true when createdAt is recent", () => {
     expect(isWithinCancelWindow(new Date())).toBe(true);
     expect(isWithinCancelWindow(new Date(Date.now() - 1000))).toBe(true);
