@@ -150,8 +150,19 @@
       "dashboard": "Dashboard",
       "rfqs": "RFQs",
       "orders": "Orders",
+      "payouts": "Payouts",
       "settings": "Settings",
       "logout": "Logout"
+    },
+    "payouts": {
+      "title": "Payouts",
+      "total": "total",
+      "empty": "No payouts yet.",
+      "status": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "paid": "Paid"
+      }
     },
     "login": {
       "title": "Sign in",

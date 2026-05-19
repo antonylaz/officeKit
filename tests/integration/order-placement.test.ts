@@ -136,4 +136,38 @@ describe("order lifecycle", () => {
     const projAfter = await db.project.findUniqueOrThrow({ where: { id: proj.id } });
     expect(projAfter.status).toBe("quotes_received");
   });
+
+  it("transitionOrderStatus to delivered creates a stub transfer ID in stub mode", async () => {
+    // Use the existing orderId from beforeAll, now in shipped state, move to delivered
+    const updated = await transitionOrderStatus(orderId, supplierId, "delivered");
+    // In stub mode, status should be auto-promoted to 'paid'
+    expect(["delivered", "paid"]).toContain(updated.status);
+    const final = await db.order.findUniqueOrThrow({ where: { id: orderId } });
+    expect(final.stripeTransferId).toBeTruthy();
+    expect(final.stripeTransferId!.includes("_stub_")).toBe(true);
+  });
+
+  it("transitionOrderStatus rejects shipped → paid (must go via delivered)", async () => {
+    // Create a fresh order at confirmed
+    const item = await db.itemCatalog.findFirstOrThrow();
+    const company = await db.company.create({ data: { name: "Paid Test " + Date.now() } });
+    const proj = await db.project.create({ data: { companyId: company.id, name: "x", industry: "it", headcount: 1, city: "S", status: "ordered" } });
+    const rfq = await db.rfq.create({ data: { projectId: proj.id, supplierId, status: "won", deadlineAt: new Date(Date.now() + 86400_000), decidedAt: new Date() } });
+    const quote = await db.quote.create({
+      data: {
+        rfqId: rfq.id, totalAmount: 1000, totalAmountExVat: 800, validUntil: new Date(Date.now() + 14 * 86400_000),
+        notes: "", perks: [], submittedAt: new Date(),
+        lines: { create: [{ itemId: item.id, quantity: 1, mode: "new", unitPrice: 800, lineTotal: 800 }] },
+      },
+    });
+    const o = await db.order.create({
+      data: {
+        projectId: proj.id, quoteId: quote.id, supplierId, companyId: company.id, status: "shipped",
+        totalAmount: 1000, commissionAmount: 60, payoutAmount: 940,
+        deliveryAddress: {} as never, deliveryWindowStart: new Date(), deliveryWindowEnd: new Date(),
+        paymentMethod: "card",
+      },
+    });
+    await expect(transitionOrderStatus(o.id, supplierId, "paid")).rejects.toThrow("invalid_transition");
+  });
 });

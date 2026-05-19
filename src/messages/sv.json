@@ -150,8 +150,19 @@
       "dashboard": "Översikt",
       "rfqs": "Förfrågningar",
       "orders": "Ordrar",
+      "payouts": "Utbetalningar",
       "settings": "Inställningar",
       "logout": "Logga ut"
+    },
+    "payouts": {
+      "title": "Utbetalningar",
+      "total": "totalt",
+      "empty": "Inga utbetalningar ännu.",
+      "status": {
+        "pending": "Väntar",
+        "processing": "Behandlas",
+        "paid": "Betald"
+      }
     },
     "login": {
       "title": "Logga in",

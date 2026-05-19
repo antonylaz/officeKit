@@ -13,6 +13,7 @@ export async function Sidebar() {
         <li><Link href="/supplier" style={navLink}>{t("dashboard")}</Link></li>
         <li><Link href="/supplier/rfqs" style={navLink}>{t("rfqs")}</Link></li>
         <li><Link href="/supplier/orders" style={navLink}>{t("orders")}</Link></li>
+        <li><Link href="/supplier/payouts" style={navLink}>{t("payouts")}</Link></li>
         <li><Link href="/supplier/settings" style={navLink}>{t("settings")}</Link></li>
       </ul>
     </nav>
