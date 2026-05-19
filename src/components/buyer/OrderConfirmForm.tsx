@@ -50,7 +50,11 @@ export function OrderConfirmForm({ projectId, quoteId, defaultCity, defaultCompa
     });
     const data = await res.json();
     if (!res.ok) { setError(typeof data.error === "string" ? data.error : "place_failed"); setSubmitting(false); return; }
-    router.push(`/orders/${data.orderId}`);
+    if (data.clientSecret) {
+      router.push(`/orders/${data.orderId}/pay?cs=${encodeURIComponent(data.clientSecret)}`);
+    } else {
+      router.push(`/orders/${data.orderId}`);
+    }
   }
 
   return (

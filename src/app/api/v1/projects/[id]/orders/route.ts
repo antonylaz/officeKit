@@ -35,7 +35,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  let order, winningSupplier;
+  let order, winningSupplier, clientSecret: string | null;
   try {
     const result = await placeOrder({
       projectId: id,
@@ -49,6 +49,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     });
     order = result.order;
     winningSupplier = result.winningSupplier;
+    clientSecret = result.clientSecret;
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
@@ -91,5 +92,5 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     }
   }
 
-  return NextResponse.json({ orderId: order.id });
+  return NextResponse.json({ orderId: order.id, clientSecret });
 }

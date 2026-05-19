@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { getAuthorizedProject } from "@/server/projects";
+import { getStripe, mockId, stripeEnabled } from "@/lib/stripe";
 import type { PaymentMethod } from "@prisma/client";
 
 export interface PlaceOrderInput {
@@ -65,5 +66,29 @@ export async function placeOrder(input: PlaceOrderInput) {
     return ord;
   });
 
-  return { order, winningSupplier: quote.rfq.supplier };
+  // Create PaymentIntent (real or stub)
+  let paymentIntentId: string;
+  let clientSecret: string | null = null;
+
+  if (stripeEnabled) {
+    const stripe = getStripe()!;
+    const pi = await stripe.paymentIntents.create({
+      amount: order.totalAmount,
+      currency: "sek",
+      payment_method_types: ["card", "klarna"],
+      metadata: { orderId: order.id, projectId: input.projectId, supplierId: quote.rfq.supplierId },
+      transfer_data: quote.rfq.supplier.stripeAccountId
+        ? { destination: quote.rfq.supplier.stripeAccountId, amount: order.payoutAmount }
+        : undefined,
+      capture_method: "automatic",
+    });
+    paymentIntentId = pi.id;
+    clientSecret = pi.client_secret;
+  } else {
+    paymentIntentId = mockId("pi");
+  }
+
+  await db.order.update({ where: { id: order.id }, data: { stripePaymentIntentId: paymentIntentId } });
+
+  return { order: { ...order, stripePaymentIntentId: paymentIntentId }, winningSupplier: quote.rfq.supplier, clientSecret };
 }
