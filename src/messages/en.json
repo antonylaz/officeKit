@@ -100,6 +100,20 @@
       "body": "Your placed orders will appear here once you accept a quote."
     }
   },
+  "buyer": {
+    "orders": {
+      "title": "Your orders",
+      "emptyTitle": "No orders yet",
+      "emptyBody": "Your placed orders will appear here once you accept a quote."
+    },
+    "orderDetail": {
+      "delivery": "Delivery",
+      "total": "Total",
+      "status": "Status",
+      "items": "Items",
+      "cancelled": "Cancelled"
+    }
+  },
   "supplier": {
     "nav": {
       "dashboard": "Dashboard",

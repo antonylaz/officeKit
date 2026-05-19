@@ -100,6 +100,20 @@
       "body": "Dina ordrar visas här när du har accepterat en offert."
     }
   },
+  "buyer": {
+    "orders": {
+      "title": "Dina ordrar",
+      "emptyTitle": "Inga ordrar än",
+      "emptyBody": "Dina ordrar visas här när du har accepterat en offert."
+    },
+    "orderDetail": {
+      "delivery": "Leverans",
+      "total": "Totalt",
+      "status": "Status",
+      "items": "Artiklar",
+      "cancelled": "Avbruten"
+    }
+  },
   "supplier": {
     "nav": {
       "dashboard": "Översikt",
