@@ -14,12 +14,14 @@ export default async function SupplierRfqDetailPage({ params }: { params: Promis
 
   // Ensure a draft quote exists for the builder to edit
   if (!rfq.quote) {
+    // eslint-disable-next-line react-hooks/purity
+    const twoWeeksFromNow = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     await db.quote.create({
       data: {
         rfqId: rfq.id,
         totalAmount: 0,
         totalAmountExVat: 0,
-        validUntil: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        validUntil: twoWeeksFromNow,
         notes: "",
         perks: [],
         lines: {

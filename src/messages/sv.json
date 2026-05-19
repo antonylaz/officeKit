@@ -101,56 +101,94 @@
     }
   },
   "supplier": {
+    "nav": {
+      "dashboard": "Översikt",
+      "rfqs": "Förfrågningar",
+      "settings": "Inställningar",
+      "logout": "Logga ut"
+    },
+    "login": {
+      "title": "Logga in",
+      "subtitle": "Använd e-post, lösenord och 2FA-kod.",
+      "email": "E-post",
+      "password": "Lösenord",
+      "totp": "Autentiseringskod",
+      "recoveryCode": "Återställningskod",
+      "useRecovery": "Använd återställningskod istället",
+      "useTotp": "Använd autentiseringskod",
+      "submit": "Logga in",
+      "invalid": "Fel e-post, lösenord eller 2FA-kod."
+    },
+    "onboarding": {
+      "setPassword": {
+        "title": "Välj lösenord",
+        "password": "Lösenord",
+        "hint": "Minst 8 tecken",
+        "next": "Nästa"
+      },
+      "enroll2fa": {
+        "title": "Aktivera 2FA",
+        "qrInstruction": "Skanna med Authy / Google Authenticator / 1Password.",
+        "code": "6-siffrig kod",
+        "verify": "Verifiera"
+      },
+      "recovery": {
+        "title": "Spara dina återställningskoder",
+        "body": "Spara dessa på ett säkert ställe — du kan logga in med dem om du tappar din autentiseringsapp.",
+        "download": "Ladda ner",
+        "continue": "Fortsätt till inloggning"
+      }
+    },
     "inbox": {
-      "title": "Offertförfrågningar",
-      "totalRequests": "förfrågningar",
+      "title": "RFQ-inkorg",
+      "totalRequests": "totalt",
       "empty": "Inga förfrågningar matchar detta filter.",
       "closesIn": "Stänger om",
       "filter_all": "Alla",
-      "filter_sent": "Skickade",
+      "filter_sent": "Nya",
       "filter_viewed": "Visade",
-      "filter_quoted": "Offerterade",
+      "filter_quoted": "Offererade",
       "filter_won": "Vunna",
       "filter_lost": "Förlorade",
       "filter_expired": "Utgångna"
     },
     "dashboard": {
-      "title": "Instrumentpanel",
+      "title": "RFQ-inkorg",
       "incoming": "Inkommande förfrågningar",
       "kpi": {
         "openRfqs": "Öppna förfrågningar",
-        "winRate": "Vinstfrekvens (30d)",
+        "winRate": "Vinstgrad (30d)",
         "pipeline": "Pipeline-värde",
         "avgResponse": "Genomsnittlig svarstid"
       }
     },
     "stockMix": {
       "title": "Lagermix",
-      "empty": "Inga offertrader de senaste 90 dagarna.",
+      "empty": "Inget offertdata ännu.",
       "units": "enheter",
       "new": "Nytt",
-      "reused": "Begagnat"
+      "reused": "Återbrukat"
     },
     "winRate": {
-      "title": "Vinstfrekvens vs konkurrenter",
-      "empty": "Ingen head-to-head-data ännu.",
-      "vs": "mot",
-      "winsOf": "{n} head-to-head"
+      "title": "Var du vinner",
+      "empty": "Ingen konkurrentdata ännu.",
+      "vs": "vs.",
+      "winsOf": "vinster av {n}"
     },
     "rfq": {
-      "competitorsLabel": "konkurrerande offerter",
+      "competitorsLabel": "konkurrenter",
       "people": "personer",
       "deadline": "Deadline:",
-      "builderTitle": "Din offert",
-      "notes": "Noteringar",
+      "builderTitle": "Bygg din offert",
+      "notes": "Anteckningar",
       "perks": "Förmåner",
       "addPerk": "Lägg till förmån…",
-      "totals": "Summering",
+      "totals": "Summor",
       "subtotal": "Delsumma",
       "vat": "Moms (25%)",
       "total": "Totalt",
-      "savedAt": "Utkast sparat",
-      "submitted": "Offert skickad",
+      "savedAt": "Sparat",
+      "submitted": "Skickat ✓",
       "saveDraft": "Spara utkast",
       "submitQuote": "Skicka offert"
     }

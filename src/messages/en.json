@@ -101,13 +101,51 @@
     }
   },
   "supplier": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "rfqs": "RFQs",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Use your email, password and 2FA code.",
+      "email": "Email",
+      "password": "Password",
+      "totp": "Authenticator code",
+      "recoveryCode": "Recovery code",
+      "useRecovery": "Use a recovery code instead",
+      "useTotp": "Use authenticator code",
+      "submit": "Sign in",
+      "invalid": "Wrong email, password, or 2FA code."
+    },
+    "onboarding": {
+      "setPassword": {
+        "title": "Set your password",
+        "password": "Password",
+        "hint": "8+ characters",
+        "next": "Next"
+      },
+      "enroll2fa": {
+        "title": "Enable 2FA",
+        "qrInstruction": "Scan with Authy / Google Authenticator / 1Password.",
+        "code": "6-digit code",
+        "verify": "Verify"
+      },
+      "recovery": {
+        "title": "Save your recovery codes",
+        "body": "Store these somewhere safe — they let you log in if you lose your authenticator.",
+        "download": "Download",
+        "continue": "Continue to login"
+      }
+    },
     "inbox": {
-      "title": "RFQ Inbox",
-      "totalRequests": "requests",
+      "title": "RFQ inbox",
+      "totalRequests": "total",
       "empty": "No RFQs match this filter.",
       "closesIn": "Closes in",
       "filter_all": "All",
-      "filter_sent": "Sent",
+      "filter_sent": "New",
       "filter_viewed": "Viewed",
       "filter_quoted": "Quoted",
       "filter_won": "Won",
@@ -115,42 +153,42 @@
       "filter_expired": "Expired"
     },
     "dashboard": {
-      "title": "Dashboard",
-      "incoming": "Incoming RFQs",
+      "title": "RFQ inbox",
+      "incoming": "Incoming requests",
       "kpi": {
         "openRfqs": "Open RFQs",
-        "winRate": "Win Rate (30d)",
-        "pipeline": "Pipeline Value",
-        "avgResponse": "Avg. Response Time"
+        "winRate": "Win rate (30d)",
+        "pipeline": "Pipeline value",
+        "avgResponse": "Avg. response time"
       }
     },
     "stockMix": {
-      "title": "Stock Mix",
-      "empty": "No quote lines in the last 90 days.",
+      "title": "Stock mix",
+      "empty": "No quote data yet.",
       "units": "units",
       "new": "New",
       "reused": "Reused"
     },
     "winRate": {
-      "title": "Win Rate vs Competitors",
-      "empty": "No head-to-head data yet.",
-      "vs": "vs",
-      "winsOf": "{n} head-to-head"
+      "title": "Where you win",
+      "empty": "No competitor data yet.",
+      "vs": "vs.",
+      "winsOf": "wins of {n}"
     },
     "rfq": {
-      "competitorsLabel": "competing quotes",
+      "competitorsLabel": "competitors",
       "people": "people",
       "deadline": "Deadline:",
-      "builderTitle": "Your Quote",
+      "builderTitle": "Build your quote",
       "notes": "Notes",
       "perks": "Perks",
-      "addPerk": "Add perk…",
+      "addPerk": "Add a perk…",
       "totals": "Totals",
       "subtotal": "Subtotal",
       "vat": "VAT (25%)",
       "total": "Total",
-      "savedAt": "Draft saved at",
-      "submitted": "Quote submitted",
+      "savedAt": "Saved at",
+      "submitted": "Submitted ✓",
       "saveDraft": "Save draft",
       "submitQuote": "Submit quote"
     }
