@@ -70,8 +70,8 @@ export async function upsertDraft(input: DraftQuoteInput) {
 }
 
 export async function submitQuote(rfqId: string, supplierId: string) {
-  const user = await db.user.findFirst({ where: { supplierId, role: "supplier" } });
-  if (!user?.twoFaEnabled) throw new Error("2fa_required");
+  const user = await db.user.findFirst({ where: { supplierId, role: "supplier", twoFaEnabled: true } });
+  if (!user) throw new Error("2fa_required");
 
   const quote = await db.quote.findFirst({
     where: { rfqId, rfq: { supplierId } },
