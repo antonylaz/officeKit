@@ -54,6 +54,14 @@ export async function createProjectWithGhostCompany(input: CreateProjectInput) {
     return project;
   });
 
+  const { track } = await import("@/lib/analytics");
+  await track("project_created", {
+    distinctId: claimToken,
+    industry: input.industry,
+    headcount: input.headcount,
+    city: input.city,
+  });
+
   return { project, claimToken };
 }
 
