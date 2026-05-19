@@ -101,8 +101,39 @@
     }
   },
   "buyer": {
+    "quotes": {
+      "title": "Compare quotes",
+      "subtitle": "{received} of {expected} suppliers responded",
+      "noQuotesYet": "No quotes yet — we're still waiting on supplier responses.",
+      "inclVat": "incl. VAT",
+      "choose": "Choose {name}",
+      "badges": {
+        "bestValue": "Best value",
+        "sustainability": "Sustainability leader"
+      }
+    },
+    "confirm": {
+      "title": "Confirm order",
+      "supplier": "Supplier",
+      "billing": "Billing",
+      "delivery": "Delivery",
+      "payment": "Payment",
+      "optional": "Optional",
+      "companyName": "Company name",
+      "orgNumber": "Org. number",
+      "street": "Street",
+      "postal": "Postal code",
+      "city": "City",
+      "windowStart": "Delivery from",
+      "windowEnd": "Delivery to",
+      "paymentCard": "Card",
+      "paymentKlarna": "Klarna 30-day invoice",
+      "paymentNotice": "Payment will be handled in the next step.",
+      "lostReasonLabel": "Tell the other suppliers what tipped your decision (optional)",
+      "placeOrder": "Place order"
+    },
     "orders": {
-      "title": "Your orders",
+      "title": "My orders",
       "emptyTitle": "No orders yet",
       "emptyBody": "Your placed orders will appear here once you accept a quote."
     },
@@ -191,7 +222,7 @@
       "winsOf": "wins of {n}"
     },
     "orders": {
-      "title": "Orders",
+      "title": "Active orders",
       "total": "total",
       "empty": "No orders yet."
     },

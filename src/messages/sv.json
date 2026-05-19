@@ -101,17 +101,48 @@
     }
   },
   "buyer": {
+    "quotes": {
+      "title": "Jämför offerter",
+      "subtitle": "{received} av {expected} leverantörer har svarat",
+      "noQuotesYet": "Inga offerter ännu — vi väntar fortfarande på svar från leverantörerna.",
+      "inclVat": "inkl. moms",
+      "choose": "Välj {name}",
+      "badges": {
+        "bestValue": "Bästa pris",
+        "sustainability": "Hållbarhet"
+      }
+    },
+    "confirm": {
+      "title": "Bekräfta beställning",
+      "supplier": "Leverantör",
+      "billing": "Faktureringsuppgifter",
+      "delivery": "Leveransadress",
+      "payment": "Betalning",
+      "optional": "Övrigt",
+      "companyName": "Företagsnamn",
+      "orgNumber": "Org.nr",
+      "street": "Gatuadress",
+      "postal": "Postnummer",
+      "city": "Stad",
+      "windowStart": "Leverans från",
+      "windowEnd": "Leverans till",
+      "paymentCard": "Kort",
+      "paymentKlarna": "Klarna 30-dagars faktura",
+      "paymentNotice": "Betalning hanteras i nästa steg.",
+      "lostReasonLabel": "Berätta för de andra leverantörerna varför du valde någon annan (valfritt)",
+      "placeOrder": "Lägg beställning"
+    },
     "orders": {
-      "title": "Dina ordrar",
-      "emptyTitle": "Inga ordrar än",
-      "emptyBody": "Dina ordrar visas här när du har accepterat en offert."
+      "title": "Mina beställningar",
+      "emptyTitle": "Inga beställningar ännu",
+      "emptyBody": "Dina beställningar visas här när du har accepterat en offert."
     },
     "orderDetail": {
       "delivery": "Leverans",
       "total": "Totalt",
       "status": "Status",
       "items": "Artiklar",
-      "cancelled": "Avbruten"
+      "cancelled": "Avbokad"
     }
   },
   "supplier": {
@@ -191,9 +222,9 @@
       "winsOf": "vinster av {n}"
     },
     "orders": {
-      "title": "Ordrar",
+      "title": "Aktiva beställningar",
       "total": "totalt",
-      "empty": "Inga ordrar ännu."
+      "empty": "Inga beställningar ännu."
     },
     "rfq": {
       "competitorsLabel": "konkurrenter",
