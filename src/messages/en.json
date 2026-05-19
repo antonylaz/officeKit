@@ -118,6 +118,7 @@
     "nav": {
       "dashboard": "Dashboard",
       "rfqs": "RFQs",
+      "orders": "Orders",
       "settings": "Settings",
       "logout": "Logout"
     },
@@ -188,6 +189,11 @@
       "empty": "No competitor data yet.",
       "vs": "vs.",
       "winsOf": "wins of {n}"
+    },
+    "orders": {
+      "title": "Orders",
+      "total": "total",
+      "empty": "No orders yet."
     },
     "rfq": {
       "competitorsLabel": "competitors",

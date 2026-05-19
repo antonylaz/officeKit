@@ -118,6 +118,7 @@
     "nav": {
       "dashboard": "Översikt",
       "rfqs": "Förfrågningar",
+      "orders": "Ordrar",
       "settings": "Inställningar",
       "logout": "Logga ut"
     },
@@ -188,6 +189,11 @@
       "empty": "Ingen konkurrentdata ännu.",
       "vs": "vs.",
       "winsOf": "vinster av {n}"
+    },
+    "orders": {
+      "title": "Ordrar",
+      "total": "totalt",
+      "empty": "Inga ordrar ännu."
     },
     "rfq": {
       "competitorsLabel": "konkurrenter",
