@@ -114,6 +114,29 @@
       "filter_lost": "Förlorade",
       "filter_expired": "Utgångna"
     },
+    "dashboard": {
+      "title": "Instrumentpanel",
+      "incoming": "Inkommande förfrågningar",
+      "kpi": {
+        "openRfqs": "Öppna förfrågningar",
+        "winRate": "Vinstfrekvens (30d)",
+        "pipeline": "Pipeline-värde",
+        "avgResponse": "Genomsnittlig svarstid"
+      }
+    },
+    "stockMix": {
+      "title": "Lagermix",
+      "empty": "Inga offertrader de senaste 90 dagarna.",
+      "units": "enheter",
+      "new": "Nytt",
+      "reused": "Begagnat"
+    },
+    "winRate": {
+      "title": "Vinstfrekvens vs konkurrenter",
+      "empty": "Ingen head-to-head-data ännu.",
+      "vs": "mot",
+      "winsOf": "{n} head-to-head"
+    },
     "rfq": {
       "competitorsLabel": "konkurrerande offerter",
       "people": "personer",

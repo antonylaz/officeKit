@@ -114,6 +114,29 @@
       "filter_lost": "Lost",
       "filter_expired": "Expired"
     },
+    "dashboard": {
+      "title": "Dashboard",
+      "incoming": "Incoming RFQs",
+      "kpi": {
+        "openRfqs": "Open RFQs",
+        "winRate": "Win Rate (30d)",
+        "pipeline": "Pipeline Value",
+        "avgResponse": "Avg. Response Time"
+      }
+    },
+    "stockMix": {
+      "title": "Stock Mix",
+      "empty": "No quote lines in the last 90 days.",
+      "units": "units",
+      "new": "New",
+      "reused": "Reused"
+    },
+    "winRate": {
+      "title": "Win Rate vs Competitors",
+      "empty": "No head-to-head data yet.",
+      "vs": "vs",
+      "winsOf": "{n} head-to-head"
+    },
     "rfq": {
       "competitorsLabel": "competing quotes",
       "people": "people",
