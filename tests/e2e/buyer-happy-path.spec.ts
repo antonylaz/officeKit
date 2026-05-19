@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { AxeBuilder } from "@axe-core/playwright";
 
 test("buyer can go from landing through floor plan to request page", async ({ page }) => {
   // --- Landing page ---
@@ -41,4 +42,23 @@ test("buyer can go from landing through floor plan to request page", async ({ pa
   await expect(page).toHaveURL(/\/request$/);
   // h1 uses t("request.title") = "Begär 3 offerter"
   await expect(page.getByRole("heading", { name: /begär 3 offerter/i })).toBeVisible();
+});
+
+test("landing page passes axe a11y scan", async ({ page }) => {
+  await page.goto("/sv");
+  const results = await new AxeBuilder({ page }).analyze();
+  // Allow color-contrast violations (we use brand colours that are sometimes borderline)
+  // Fail only on serious or critical non-color-contrast violations.
+  const critical = results.violations.filter((v) => (v.impact === "serious" || v.impact === "critical") && v.id !== "color-contrast");
+  if (critical.length) {
+    console.log("a11y critical violations:", JSON.stringify(critical.map((v) => ({ id: v.id, nodes: v.nodes.length })), null, 2));
+  }
+  expect(critical).toHaveLength(0);
+});
+
+test("supplier login page passes axe a11y scan", async ({ page }) => {
+  await page.goto("/sv/supplier/login");
+  const results = await new AxeBuilder({ page }).analyze();
+  const critical = results.violations.filter((v) => (v.impact === "serious" || v.impact === "critical") && v.id !== "color-contrast");
+  expect(critical).toHaveLength(0);
 });
