@@ -257,6 +257,7 @@ model Rfq {
   quotedAt     DateTime?  @map("quoted_at")
   decidedAt    DateTime?  @map("decided_at")
   deadlineAt   DateTime   @map("deadline_at")
+  lostReason   String?    @map("lost_reason")
   project      Project    @relation(fields: [projectId], references: [id])
   supplier     Supplier   @relation(fields: [supplierId], references: [id])
   quote        Quote?
@@ -313,6 +314,10 @@ model Order {
   paymentMethod           PaymentMethod @map("payment_method")
   stripePaymentIntentId   String?       @map("stripe_payment_intent_id")
   stripeTransferId        String?       @map("stripe_transfer_id")
+  trackingNumber          String?       @map("tracking_number")
+  deliveredAt             DateTime?     @map("delivered_at")
+  cancelledAt             DateTime?     @map("cancelled_at")
+  cancelReason            String?       @map("cancel_reason")
   project                 Project       @relation(fields: [projectId], references: [id])
   quote                   Quote         @relation(fields: [quoteId], references: [id])
   supplier                Supplier      @relation(fields: [supplierId], references: [id])
