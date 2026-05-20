@@ -33,6 +33,7 @@ async function run() {
   const { PrismaPg } = await import("@prisma/adapter-pg");
   const { PrismaClient } = await import("@prisma/client");
   const { CATALOG } = await import("./catalog-data");
+  const { VARIANTS } = await import("./variants-data");
 
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   const adapter = new PrismaPg(pool);
@@ -64,6 +65,30 @@ async function run() {
     }
     console.log(`  → ${CATALOG.length} catalog items`);
 
+    console.log("Seeding product variants...");
+    for (const v of VARIANTS) {
+      await db.productVariant.upsert({
+        where: { id: v.id },
+        update: {},
+        create: {
+          id: v.id,
+          itemId: v.itemId,
+          name: v.name,
+          manufacturer: v.manufacturer,
+          sku: v.sku ?? null,
+          imageUrl: v.imageUrl,
+          specs: v.specs,
+          priceNewOre: v.priceNewSek * 100,
+          priceUsedDefaultOre: v.priceUsedDefaultSek != null ? v.priceUsedDefaultSek * 100 : null,
+          manufacturerUrl: v.manufacturerUrl ?? null,
+          blocketSearchQuery: v.blocketSearchQuery ?? null,
+          traderaSearchQuery: v.traderaSearchQuery ?? null,
+          displayOrder: v.displayOrder,
+        },
+      });
+    }
+    console.log(`  → ${VARIANTS.length} variants`);
+
     console.log("Seeding mock suppliers...");
     const suppliers = [
       {
@@ -76,6 +101,7 @@ async function run() {
           "Tech-forward office supplier, strong in monitors and AV.",
         perks: ["Free white-glove delivery", "10 yr structural warranty"],
         usedShare: 0.55,
+        serviceTypes: ["furniture"],
       },
       {
         name: "Återbruk Möbler Demo",
@@ -86,6 +112,7 @@ async function run() {
         shortDescription: "Refurbished premium furniture specialist.",
         perks: ["100% refurbished options", "Carbon-neutral delivery"],
         usedShare: 0.95,
+        serviceTypes: ["furniture"],
       },
       {
         name: "Stockholm Office Demo",
@@ -97,6 +124,29 @@ async function run() {
           "Generalist office supplier serving the Stockholm region.",
         perks: ["48h delivery within Stockholm", "On-site assembly"],
         usedShare: 0.4,
+        serviceTypes: ["furniture"],
+      },
+      {
+        name: "Bring Demo AB",
+        legalName: "Bring Demo Aktiebolag",
+        orgNumber: "559000-0004",
+        coverageAreas: ["Stockholm", "Göteborg", "Malmö", "Uppsala"],
+        verticals: ["it", "finance", "sales", "law"],
+        shortDescription: "Logistics partner specialising in office moves.",
+        perks: ["48h delivery in Stockholm region", "Inside-delivery & assembly available"],
+        usedShare: 0.0,
+        serviceTypes: ["transportation"],
+      },
+      {
+        name: "PostNord Demo AB",
+        legalName: "PostNord Demo Aktiebolag",
+        orgNumber: "559000-0005",
+        coverageAreas: ["Stockholm"],
+        verticals: ["it", "finance", "sales", "law"],
+        shortDescription: "Nationwide parcel and pallet logistics.",
+        perks: ["Saturday delivery available", "Track-and-trace included"],
+        usedShare: 0.0,
+        serviceTypes: ["transportation"],
       },
     ];
     for (const s of suppliers) {

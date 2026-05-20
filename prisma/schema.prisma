@@ -31,6 +31,7 @@ enum ItemCategory {
   storage
   lounge
   kitchen
+  transportation
 }
 
 enum ItemMode {
@@ -163,6 +164,7 @@ model Supplier {
   shortDescription  String?  @map("short_description")
   perks             String[]
   usedShare         Decimal  @default(0.0) @map("used_share") @db.Decimal(3, 2)
+  serviceTypes      String[] @default(["furniture"]) @map("service_types")
   users             User[]
   pricing           SupplierPricing[]
   rfqs              Rfq[]
@@ -188,6 +190,7 @@ model ItemCatalog {
   projectItems      ProjectItem[]
   supplierPricing   SupplierPricing[]
   quoteLines        QuoteLine[]
+  variants          ProductVariant[]
   createdAt         DateTime     @default(now()) @map("created_at")
   updatedAt         DateTime     @updatedAt @map("updated_at")
 
@@ -240,8 +243,10 @@ model ProjectItem {
   quantity            Int
   mode                ItemMode
   placedOnFloorPlan   Boolean  @default(false) @map("placed_on_floor_plan")
+  variantId           String?  @map("variant_id")
   project             Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   item                ItemCatalog @relation(fields: [itemId], references: [id])
+  variant             ProductVariant? @relation(fields: [variantId], references: [id])
 
   @@unique([projectId, itemId])
   @@map("project_items")
@@ -292,10 +297,39 @@ model QuoteLine {
   mode        ItemMode
   unitPrice   Int      @map("unit_price")
   lineTotal   Int      @map("line_total")
+  variantId   String?  @map("variant_id")
   quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   item        ItemCatalog @relation(fields: [itemId], references: [id])
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
 
   @@map("quote_lines")
+}
+
+model ProductVariant {
+  id                    String   @id @default(uuid())
+  itemId                String   @map("item_id")
+  item                  ItemCatalog @relation(fields: [itemId], references: [id])
+  name                  String
+  manufacturer          String
+  sku                   String?
+  imageUrl              String   @map("image_url")
+  specs                 Json     @default("{}")
+  priceNewOre           Int      @map("price_new_ore")
+  priceUsedDefaultOre   Int?     @map("price_used_default_ore")
+  manufacturerUrl       String?  @map("manufacturer_url")
+  blocketSearchQuery    String?  @map("blocket_search_query")
+  traderaSearchQuery    String?  @map("tradera_search_query")
+  displayOrder          Int      @default(0) @map("display_order")
+  active                Boolean  @default(true)
+  sourceFeedId          String?  @map("source_feed_id")
+  lastSyncedAt          DateTime? @map("last_synced_at")
+  projectItems          ProjectItem[]
+  quoteLines            QuoteLine[]
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@index([itemId, displayOrder])
+  @@map("product_variants")
 }
 
 model Order {
