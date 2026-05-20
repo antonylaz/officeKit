@@ -7,13 +7,15 @@ import type { ItemCatalog } from "@prisma/client";
 import { PlacedItemNode } from "./PlacedItem";
 
 export function Canvas({
-  state, rooms, cellPx, catalog, dispatch,
+  state, rooms, cellPx, catalog, dispatch, backgroundImageUrl, backgroundOpacity = 0.4,
 }: {
   state: FloorState;
   rooms: RoomOutline[];
   cellPx: number;
   catalog: ItemCatalog[];
   dispatch: React.Dispatch<Action>;
+  backgroundImageUrl?: string | null;
+  backgroundOpacity?: number;
 }) {
   const itemById = new Map(catalog.map((c) => [c.id, c]));
   const { setNodeRef } = useDroppable({ id: "canvas" });
@@ -36,11 +38,39 @@ export function Canvas({
         position: "relative",
         width: state.canvas.width * cellPx,
         height: state.canvas.height * cellPx,
-        backgroundImage: `repeating-linear-gradient(0deg, var(--color-line) 0, var(--color-line) 1px, transparent 1px, transparent ${cellPx}px), repeating-linear-gradient(90deg, var(--color-line) 0, var(--color-line) 1px, transparent 1px, transparent ${cellPx}px)`,
         backgroundColor: "var(--color-paper)",
         border: "1px solid var(--color-line)",
+        overflow: "hidden",
       }}
     >
+      {backgroundImageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={backgroundImageUrl}
+          alt=""
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            opacity: backgroundOpacity,
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+      )}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `repeating-linear-gradient(0deg, var(--color-line) 0, var(--color-line) 1px, transparent 1px, transparent ${cellPx}px), repeating-linear-gradient(90deg, var(--color-line) 0, var(--color-line) 1px, transparent 1px, transparent ${cellPx}px)`,
+          pointerEvents: "none",
+          zIndex: 0,
+          opacity: backgroundImageUrl ? 0.35 : 1,
+        }}
+      />
       {rooms.map((r) => (
         <div key={r.id} style={{
           position: "absolute", left: r.x * cellPx, top: r.y * cellPx, width: r.w * cellPx, height: r.h * cellPx,

@@ -39,6 +39,24 @@
       "createFailed": "Couldn't create project. Please check your input."
     }
   },
+  "floorplan": {
+    "upload": {
+      "dropOrClick": "Drop or click to upload a floor plan",
+      "formats": "PNG, JPG, WebP, or PDF (max 8 MB)",
+      "uploaded": "Background image loaded",
+      "remove": "Remove",
+      "processing": "Processing…",
+      "opacity": "Opacity",
+      "errors": {
+        "tooLarge": "File is too large (max 8 MB)",
+        "invalidType": "Unsupported file type — use PNG, JPG, WebP, or PDF",
+        "pdfFailed": "Couldn't read the PDF — try an image file instead",
+        "uploadFailed": "Upload failed — please try again",
+        "removeFailed": "Couldn't remove — please try again",
+        "network": "Network error — please try again"
+      }
+    }
+  },
   "aiBuild": {
     "eyebrow": "Build your office with AI",
     "ctaLanding": "Build with AI",

@@ -39,6 +39,24 @@
       "createFailed": "Det gick inte att skapa projektet. Kontrollera dina uppgifter."
     }
   },
+  "floorplan": {
+    "upload": {
+      "dropOrClick": "Släpp eller klicka för att ladda upp planlösning",
+      "formats": "PNG, JPG, WebP eller PDF (max 8 MB)",
+      "uploaded": "Bakgrundsbild laddad",
+      "remove": "Ta bort",
+      "processing": "Bearbetar…",
+      "opacity": "Opacitet",
+      "errors": {
+        "tooLarge": "Filen är för stor (max 8 MB)",
+        "invalidType": "Filtypen stöds inte — använd PNG, JPG, WebP eller PDF",
+        "pdfFailed": "Kunde inte läsa PDF:en — försök med en bildfil istället",
+        "uploadFailed": "Kunde inte ladda upp — försök igen",
+        "removeFailed": "Kunde inte ta bort — försök igen",
+        "network": "Nätverksfel — försök igen"
+      }
+    }
+  },
   "aiBuild": {
     "eyebrow": "Bygg ditt kontor med AI",
     "ctaLanding": "Bygg med AI",

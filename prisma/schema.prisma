@@ -226,6 +226,7 @@ model Project {
   moveInDate        DateTime?     @map("move_in_date") @db.Date
   status            ProjectStatus @default(draft)
   floorPlanData     Json?         @map("floor_plan_data")
+  floorPlanImageUrl String?       @map("floor_plan_image_url")
   company           Company       @relation(fields: [companyId], references: [id])
   createdByUser     User?         @relation(fields: [createdByUserId], references: [id])
   items             ProjectItem[]
