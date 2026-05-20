@@ -1,14 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
-import { loadStripe, type Stripe } from "@stripe/stripe-js";
+import { useMemo, useState } from "react";
+import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 export function PaymentForm({ clientSecret, publishableKey, returnUrl }: { clientSecret: string; publishableKey: string; returnUrl: string }) {
-  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
-
-  useEffect(() => {
-    if (publishableKey) setStripePromise(loadStripe(publishableKey));
-  }, [publishableKey]);
+  const stripePromise = useMemo(() => (publishableKey ? loadStripe(publishableKey) : null), [publishableKey]);
 
   if (!publishableKey) {
     return <p style={{ marginTop: 24, color: "var(--color-gold)" }}>Stripe not configured (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY missing). Payment cannot complete in dev without keys.</p>;

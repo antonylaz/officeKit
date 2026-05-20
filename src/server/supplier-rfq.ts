@@ -50,9 +50,9 @@ export async function getRfqDetail(rfqId: string, supplierId: string) {
   return db.rfq.findFirst({
     where: { id: rfqId, supplierId },
     include: {
-      project: { include: { company: true, items: { include: { item: true } } } },
+      project: { include: { company: true, items: { include: { item: true, variant: true } } } },
       supplier: true,
-      quote: { include: { lines: { include: { item: true } } } },
+      quote: { include: { lines: { include: { item: true, variant: true } } } },
     },
   });
 }

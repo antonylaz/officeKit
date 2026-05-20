@@ -4,11 +4,11 @@ import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { formatSek } from "@/lib/money";
 import { QuoteLineRow } from "./QuoteLineRow";
-import type { Rfq, Project, Company, Quote, QuoteLine, ItemCatalog, ProjectItem } from "@prisma/client";
+import type { Rfq, Project, Company, Quote, QuoteLine, ItemCatalog, ProjectItem, ProductVariant } from "@prisma/client";
 
 type RfqWithEverything = Rfq & {
-  project: Project & { company: Company; items: (ProjectItem & { item: ItemCatalog })[] };
-  quote: (Quote & { lines: (QuoteLine & { item: ItemCatalog })[] }) | null;
+  project: Project & { company: Company; items: (ProjectItem & { item: ItemCatalog; variant: ProductVariant | null })[] };
+  quote: (Quote & { lines: (QuoteLine & { item: ItemCatalog; variant: ProductVariant | null })[] }) | null;
 };
 
 export function QuoteBuilder({ rfq, competitorCount }: { rfq: RfqWithEverything; competitorCount: number }) {

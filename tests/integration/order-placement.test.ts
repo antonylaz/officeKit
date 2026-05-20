@@ -9,7 +9,6 @@ const adapter = new PrismaPg(pool);
 const db = new PrismaClient({ adapter });
 
 let projectId: string;
-let quoteId: string;
 let supplierId: string;
 let orderId: string;
 
@@ -38,7 +37,6 @@ beforeAll(async () => {
       lines: { create: [{ itemId: item.id, quantity: 3, mode: "new", unitPrice: 26_666_67, lineTotal: 80_000_00 }] },
     },
   });
-  quoteId = quote.id;
 
   // Place order via direct DB (bypass auth requirement)
   const commissionRate = Number(supplier.commissionRate);

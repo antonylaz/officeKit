@@ -25,13 +25,19 @@ export default async function SupplierRfqDetailPage({ params }: { params: Promis
         notes: "",
         perks: [],
         lines: {
-          create: rfq.project.items.map((pi) => ({
-            itemId: pi.itemId,
-            quantity: pi.quantity,
-            mode: pi.mode,
-            unitPrice: pi.mode === "new" ? pi.item.priceNewDefault : (pi.item.priceUsedDefault ?? pi.item.priceNewDefault),
-            lineTotal: pi.quantity * (pi.mode === "new" ? pi.item.priceNewDefault : (pi.item.priceUsedDefault ?? pi.item.priceNewDefault)),
-          })),
+          create: rfq.project.items.map((pi) => {
+            const newPrice = pi.variant?.priceNewOre ?? pi.item.priceNewDefault;
+            const usedPrice = pi.variant?.priceUsedDefaultOre ?? pi.item.priceUsedDefault ?? newPrice;
+            const unitPrice = pi.mode === "new" ? newPrice : usedPrice;
+            return {
+              itemId: pi.itemId,
+              variantId: pi.variantId,
+              quantity: pi.quantity,
+              mode: pi.mode,
+              unitPrice,
+              lineTotal: pi.quantity * unitPrice,
+            };
+          }),
         },
       },
     });

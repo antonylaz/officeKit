@@ -5,6 +5,7 @@ import type { ItemMode } from "@prisma/client";
 
 export interface DraftLineInput {
   itemId: string;
+  variantId?: string | null;
   quantity: number;
   mode: ItemMode;
   unitPrice: number; // öre ex VAT
@@ -40,6 +41,7 @@ export async function upsertDraft(input: DraftQuoteInput) {
       lines: {
         create: input.lines.map((l) => ({
           itemId: l.itemId,
+          variantId: l.variantId ?? null,
           quantity: l.quantity,
           mode: l.mode,
           unitPrice: l.unitPrice,
@@ -56,6 +58,7 @@ export async function upsertDraft(input: DraftQuoteInput) {
         deleteMany: {},
         create: input.lines.map((l) => ({
           itemId: l.itemId,
+          variantId: l.variantId ?? null,
           quantity: l.quantity,
           mode: l.mode,
           unitPrice: l.unitPrice,

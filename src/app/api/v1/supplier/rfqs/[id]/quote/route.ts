@@ -5,6 +5,7 @@ import { upsertDraft, submitQuote } from "@/server/supplier-quote";
 
 const lineSchema = z.object({
   itemId: z.string().min(1),
+  variantId: z.string().min(1).nullable().optional(),
   quantity: z.number().int().min(0).max(9999),
   mode: z.enum(["new", "used"]),
   unitPrice: z.number().int().min(0).max(100_000_000),
