@@ -39,6 +39,26 @@
       "createFailed": "Det gick inte att skapa projektet. Kontrollera dina uppgifter."
     }
   },
+  "aiBuild": {
+    "eyebrow": "Bygg ditt kontor med AI",
+    "ctaLanding": "Bygg med AI",
+    "beta": "BETA",
+    "title": "Beskriv ditt kontor",
+    "subtitle": "Beskriv ditt kontor med egna ord — vi sätter ihop en första checklista och du justerar resten.",
+    "placeholder": "T.ex. ‘25-personers fintech-kontor i Stockholm, hybrid Tis/Tor, höj- och sänkbara skrivbord'",
+    "submit": "Bygg mitt kontor",
+    "submitting": "Bygger",
+    "buildingHint": "Tar ungefär 5–10 sekunder. Du hamnar på checklistan direkt.",
+    "tryThese": "Prova:",
+    "errors": {
+      "notConfigured": "AI-funktionen är inte konfigurerad på den här deployen (saknar ANTHROPIC_API_KEY).",
+      "rateLimited": "För många försök just nu — vänta en minut och försök igen.",
+      "invalidProposal": "AI:n föreslog artiklar som inte finns i katalogen — försök igen eller använd manuellt flöde.",
+      "buildFailed": "Kunde inte bygga förslaget — försök igen eller använd manuellt flöde.",
+      "offline": "Nätverksfel — försök igen om en stund.",
+      "generic": "Något gick fel — försök igen."
+    }
+  },
   "subcategory": {
     "monitors": "Skärmar",
     "chairs": "Stolar",

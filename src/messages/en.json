@@ -39,6 +39,26 @@
       "createFailed": "Couldn't create project. Please check your input."
     }
   },
+  "aiBuild": {
+    "eyebrow": "Build your office with AI",
+    "ctaLanding": "Build with AI",
+    "beta": "BETA",
+    "title": "Describe your office",
+    "subtitle": "Describe your office in your own words — we'll draft a starting checklist; you tweak the rest.",
+    "placeholder": "e.g. ‘25-person fintech office in Stockholm, hybrid Tue/Thu, sit-stand desks'",
+    "submit": "Build my office",
+    "submitting": "Building",
+    "buildingHint": "Takes ~5–10 seconds. You'll land on the checklist when it's ready.",
+    "tryThese": "Try:",
+    "errors": {
+      "notConfigured": "AI builder is not configured on this deployment (ANTHROPIC_API_KEY missing).",
+      "rateLimited": "Too many requests right now — wait a minute and try again.",
+      "invalidProposal": "AI proposed items that aren't in the catalog — try again or use the manual flow.",
+      "buildFailed": "Couldn't build a proposal — try again or use the manual flow.",
+      "offline": "Network error — try again in a moment.",
+      "generic": "Something went wrong — please try again."
+    }
+  },
   "subcategory": {
     "monitors": "Monitors",
     "chairs": "Chairs",

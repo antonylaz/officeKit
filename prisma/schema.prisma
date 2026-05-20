@@ -231,11 +231,35 @@ model Project {
   items             ProjectItem[]
   rfqs              Rfq[]
   orders            Order[]
+  aiBuildLogs       AiBuildLog[]
   createdAt         DateTime      @default(now()) @map("created_at")
   updatedAt         DateTime      @updatedAt @map("updated_at")
 
   @@index([claimToken])
   @@map("projects")
+}
+
+model AiBuildLog {
+  id               String   @id @default(uuid())
+  projectId        String?  @map("project_id")
+  project          Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  prompt           String
+  locale           String
+  model            String
+  inputTokens      Int      @default(0) @map("input_tokens")
+  outputTokens     Int      @default(0) @map("output_tokens")
+  cacheReadTokens  Int      @default(0) @map("cache_read_tokens")
+  cacheWriteTokens Int      @default(0) @map("cache_write_tokens")
+  costOre          Int      @default(0) @map("cost_ore")
+  latencyMs        Int      @default(0) @map("latency_ms")
+  rejected         Boolean  @default(false)
+  errorMessage     String?  @map("error_message")
+  buyerIp          String   @map("buyer_ip")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([buyerIp, createdAt])
+  @@map("ai_build_logs")
 }
 
 model ProjectItem {

@@ -1,11 +1,12 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { getAdminMetrics, computeFunnelRates } from "@/server/admin-metrics";
+import { getAiUsageMetrics } from "@/server/ai-metrics";
 import { KpiCard } from "@/components/supplier/KpiCard";
 import { formatSek } from "@/lib/money";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
-  const m = await getAdminMetrics();
+  const [m, ai] = await Promise.all([getAdminMetrics(), getAiUsageMetrics()]);
   const rates = computeFunnelRates(m.funnel);
 
   return (
@@ -23,6 +24,18 @@ export default async function AdminDashboardPage() {
         <FunnelStep label="RFQs sent" value={m.funnel.rfqsSent} subtext="100%" />
         <FunnelStep label="Quotes received" value={m.funnel.quotesReceived} subtext={`${Math.round(rates.quoteRate * 100)}% of RFQs`} />
         <FunnelStep label="Orders placed" value={m.funnel.ordersPlaced} subtext={`${Math.round(rates.orderRate * 100)}% of quotes`} />
+      </div>
+
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28, marginTop: 48 }}>AI office builder</h2>
+      <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+        <KpiCard label="Builds (today)" value={String(ai.buildsToday)} />
+        <KpiCard label="Builds (7 days)" value={String(ai.buildsWeek)} />
+        <KpiCard label="Avg cost / build" value={formatSek(ai.avgCostOreToday)} />
+        <KpiCard label="Avg latency" value={`${(ai.avgLatencyMsToday / 1000).toFixed(1)}s`} />
+      </div>
+      <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+        <KpiCard label="Total AI cost (30d)" value={formatSek(ai.totalCostOreMonth)} />
+        <KpiCard label="Rejection rate (30d)" value={`${ai.rejectionRatePct}%`} />
       </div>
     </div>
   );
