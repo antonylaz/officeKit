@@ -17,6 +17,7 @@
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
+    "db:download-images": "tsx scripts/download-variant-images.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

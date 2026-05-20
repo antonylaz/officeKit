@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Downloaded variant images (regenerate with: pnpm db:download-images)
+public/variants/*.jpg
+public/variants/*.png
+public/variants/*.webp

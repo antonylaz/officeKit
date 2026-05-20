@@ -69,7 +69,7 @@ async function run() {
     for (const v of VARIANTS) {
       await db.productVariant.upsert({
         where: { id: v.id },
-        update: {},
+        update: { imageUrl: v.imageUrl },
         create: {
           id: v.id,
           itemId: v.itemId,

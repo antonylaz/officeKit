@@ -13,6 +13,7 @@ cp .env.example .env.local           # configure env
 openssl rand -base64 32             # generate AUTH_SECRET, paste into .env.local
 pnpm prisma migrate deploy
 pnpm db:seed
+pnpm db:download-images  # one-time: fetch ~40 product images to public/variants/
 pnpm dev
 ```
 
