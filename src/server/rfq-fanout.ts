@@ -6,12 +6,32 @@ import { SupplierRfqNotificationEmail } from "@/emails/SupplierRfqNotification";
 export async function fanoutRfqs(projectId: string) {
   const project = await db.project.findUniqueOrThrow({
     where: { id: projectId },
-    include: { company: true, items: true },
+    include: { company: true, items: { include: { item: true } } },
   });
 
-  const all = await db.supplier.findMany({ where: { active: true } });
-  const matching = all.filter((s) => s.verticals.includes(project.industry));
-  const chosen = (matching.length >= 3 ? matching : all).slice(0, 3);
+  const allSuppliers = await db.supplier.findMany({ where: { active: true } });
+
+  // Furniture suppliers (existing behavior)
+  const furniture = allSuppliers.filter((s) => s.serviceTypes.includes("furniture"));
+  const matchingByVertical = furniture.filter((s) => s.verticals.includes(project.industry));
+  const chosenFurniture = (matchingByVertical.length >= 3 ? matchingByVertical : furniture).slice(0, 3);
+
+  // Transportation supplier (new) — only when project has transportation items
+  const hasTransport = project.items.some((i) => i.item.category === "transportation");
+  let chosenTransport: typeof allSuppliers[0] | null = null;
+  if (hasTransport) {
+    const transport = allSuppliers.filter((s) => s.serviceTypes.includes("transportation"));
+    if (transport.length > 0) {
+      // Prefer one whose coverage area includes the project's city
+      const withCoverage = transport.filter((s) => s.coverageAreas.some((a) => a.toLowerCase() === project.city.toLowerCase()));
+      chosenTransport = withCoverage[0] ?? transport[0]!;
+    }
+  }
+
+  const chosen = chosenTransport
+    ? [...chosenFurniture, chosenTransport]
+    : chosenFurniture;
+
   if (chosen.length < 1) throw new Error("no_suppliers");
 
   const deadline = addHours(new Date(), 4);

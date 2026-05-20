@@ -46,7 +46,8 @@
       "meeting": "Meeting rooms",
       "storage": "Storage & security",
       "lounge": "Lounge & client",
-      "kitchen": "Kitchen & break"
+      "kitchen": "Kitchen & break",
+      "transportation": "Transport"
     },
     "summary": {
       "title": "Your list",

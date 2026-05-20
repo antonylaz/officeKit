@@ -2,7 +2,7 @@
 import { useTranslations } from "next-intl";
 import type { ItemCatalog } from "@prisma/client";
 
-const CATEGORIES: ItemCatalog["category"][] = ["workstations", "tech", "meeting", "storage", "lounge", "kitchen"];
+const CATEGORIES: ItemCatalog["category"][] = ["workstations", "tech", "meeting", "storage", "lounge", "kitchen", "transportation"];
 
 export function CategoryTabs({ active, onChange }: { active: ItemCatalog["category"]; onChange: (c: ItemCatalog["category"]) => void }) {
   const t = useTranslations("checklist.tabs");

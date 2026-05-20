@@ -46,7 +46,8 @@
       "meeting": "Mötesrum",
       "storage": "Förvaring & säkerhet",
       "lounge": "Lounge & klient",
-      "kitchen": "Kök & pausrum"
+      "kitchen": "Kök & pausrum",
+      "transportation": "Transport"
     },
     "summary": {
       "title": "Din lista",
