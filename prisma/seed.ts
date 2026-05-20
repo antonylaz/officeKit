@@ -42,25 +42,25 @@ async function run() {
   try {
     console.log("Seeding catalog...");
     for (const item of CATALOG) {
+      const shared = {
+        category: item.category,
+        subcategory: item.subcategory ?? null,
+        subcategoryRank: item.subcategoryRank ?? 0,
+        name: item.name,
+        description: item.description,
+        icon: item.icon,
+        widthCells: item.widthCells,
+        heightCells: item.heightCells,
+        tags: item.tags,
+        priceNewDefault: item.priceNewDefaultSek * 100,
+        priceUsedDefault:
+          item.priceUsedDefaultSek === null ? null : item.priceUsedDefaultSek * 100,
+        presets: item.presets,
+      };
       await db.itemCatalog.upsert({
         where: { id: item.id },
-        update: {},
-        create: {
-          id: item.id,
-          category: item.category,
-          name: item.name,
-          description: item.description,
-          icon: item.icon,
-          widthCells: item.widthCells,
-          heightCells: item.heightCells,
-          tags: item.tags,
-          priceNewDefault: item.priceNewDefaultSek * 100,
-          priceUsedDefault:
-            item.priceUsedDefaultSek === null
-              ? null
-              : item.priceUsedDefaultSek * 100,
-          presets: item.presets,
-        },
+        update: shared,
+        create: { id: item.id, ...shared },
       });
     }
     console.log(`  → ${CATALOG.length} catalog items`);

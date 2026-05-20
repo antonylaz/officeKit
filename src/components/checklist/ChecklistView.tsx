@@ -9,6 +9,7 @@ import { VariantPickerModal } from "./VariantPickerModal";
 import type { ProjectSummary } from "@/server/project-summary";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import { groupItemsBySubcategory } from "@/lib/group-items";
 
 type ProjectWithItems = Project & { items: (ProjectItem & { item: ItemCatalog; variant: ProductVariant | null })[] };
 type Category = ItemCatalog["category"];
@@ -95,16 +96,65 @@ export function ChecklistView({
       <div>
         <CategoryTabs active={tab} onChange={setTab} />
         <div style={{ marginTop: 32 }}>
-          {(byCategory.get(tab) ?? []).map((item) => (
-            <ItemRow
-              key={item.id}
-              item={item}
-              line={lineFor(item.id)}
-              onQuantity={(q) => onQuantity(item, q)}
-              onMode={(m) => onMode(item, m)}
-              onChooseModel={() => setPickerForItemId(item.id)}
-            />
-          ))}
+          {(() => {
+            const tabItems = byCategory.get(tab) ?? [];
+            const { groups, ungrouped } = groupItemsBySubcategory(tabItems);
+            return (
+              <>
+                {groups.map((group) => (
+                  <details
+                    key={group.key}
+                    open
+                    style={{ marginBottom: 24, border: "1px solid var(--color-line)", borderRadius: 8, overflow: "hidden", background: "var(--color-paper)" }}
+                  >
+                    <summary
+                      style={{
+                        listStyle: "none",
+                        padding: "14px 18px",
+                        cursor: "pointer",
+                        background: "var(--color-cream-2, var(--color-cream))",
+                        fontSize: 11,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.12em",
+                        color: "var(--color-ink-mute)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        userSelect: "none",
+                      }}
+                    >
+                      <span>{t(`subcategory.${group.key}`)}</span>
+                      <span style={{ fontSize: 11, color: "var(--color-ink-mute)" }}>{group.items.length}</span>
+                    </summary>
+                    <div style={{ padding: "8px 18px 16px" }}>
+                      {group.items.map((item) => (
+                        <ItemRow
+                          key={item.id}
+                          item={item}
+                          line={lineFor(item.id)}
+                          onQuantity={(q) => onQuantity(item, q)}
+                          onMode={(m) => onMode(item, m)}
+                          onChooseModel={() => setPickerForItemId(item.id)}
+                        />
+                      ))}
+                    </div>
+                  </details>
+                ))}
+                {ungrouped.map((item) => (
+                  <ItemRow
+                    key={item.id}
+                    item={item}
+                    line={lineFor(item.id)}
+                    onQuantity={(q) => onQuantity(item, q)}
+                    onMode={(m) => onMode(item, m)}
+                    onChooseModel={() => setPickerForItemId(item.id)}
+                  />
+                ))}
+              </>
+            );
+          })()}
         </div>
       </div>
       <div>

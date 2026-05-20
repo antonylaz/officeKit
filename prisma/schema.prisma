@@ -178,6 +178,8 @@ model Supplier {
 model ItemCatalog {
   id                String       @id
   category          ItemCategory
+  subcategory       String?
+  subcategoryRank   Int          @default(0) @map("subcategory_rank")
   name              String
   description       String?
   icon              String?

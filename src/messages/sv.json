@@ -39,6 +39,13 @@
       "createFailed": "Det gick inte att skapa projektet. Kontrollera dina uppgifter."
     }
   },
+  "subcategory": {
+    "monitors": "Skärmar",
+    "chairs": "Stolar",
+    "desks": "Skrivbord",
+    "headsets": "Headsets",
+    "storage-units": "Förvaring"
+  },
   "checklist": {
     "tabs": {
       "workstations": "Arbetsplatser",

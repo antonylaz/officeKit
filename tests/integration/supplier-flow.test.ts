@@ -62,7 +62,8 @@ beforeAll(async () => {
 
 describe("supplier flow integration", () => {
   it("lists inbox and finds the test RFQ", async () => {
-    const { rfqs } = await listInbox(testSupplierId);
+    // Scope to status="sent" so the freshly-created RFQ isn't pushed off the page by accumulated test data
+    const { rfqs } = await listInbox(testSupplierId, { status: "sent" });
     expect(rfqs.some((r) => r.id === testRfqId)).toBe(true);
   });
 

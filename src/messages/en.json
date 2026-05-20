@@ -39,6 +39,13 @@
       "createFailed": "Couldn't create project. Please check your input."
     }
   },
+  "subcategory": {
+    "monitors": "Monitors",
+    "chairs": "Chairs",
+    "desks": "Desks",
+    "headsets": "Headsets",
+    "storage-units": "Storage"
+  },
   "checklist": {
     "tabs": {
       "workstations": "Workstations",
