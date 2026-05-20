@@ -57,7 +57,18 @@
       "total": "Total est.",
       "cityPrefix": "Your office in"
     },
-    "continueToFloorplan": "Continue to floor plan →"
+    "continueToFloorplan": "Continue to floor plan →",
+    "chooseModel": "Choose model"
+  },
+  "variantPicker": {
+    "title": "Choose variant",
+    "pickThis": "Pick this",
+    "picked": "Picked",
+    "stayGeneric": "Stay generic",
+    "findUsedBlocket": "Find used on Blocket",
+    "findUsedTradera": "Find used on Tradera",
+    "usedFrom": "or used from ~{price}",
+    "noVariants": "No variants available yet."
   },
   "floorplan": {
     "title": "Your floor plan",

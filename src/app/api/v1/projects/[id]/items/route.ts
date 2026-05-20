@@ -8,6 +8,7 @@ const schema = z.object({
   itemId: z.string().min(1),
   quantity: z.number().int().min(1).max(9999),
   mode: z.enum(["new", "used"]),
+  variantId: z.string().uuid().nullable().optional(),
 });
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -19,12 +20,12 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   await db.projectItem.upsert({
     where: { projectId_itemId: { projectId: id, itemId: parsed.data.itemId } },
-    create: { projectId: id, ...parsed.data },
-    update: { quantity: parsed.data.quantity, mode: parsed.data.mode },
+    create: { projectId: id, itemId: parsed.data.itemId, quantity: parsed.data.quantity, mode: parsed.data.mode, variantId: parsed.data.variantId ?? null },
+    update: { quantity: parsed.data.quantity, mode: parsed.data.mode, variantId: parsed.data.variantId ?? null },
   });
   const updated = await db.project.findUniqueOrThrow({
     where: { id },
-    include: { items: { include: { item: true } } },
+    include: { items: { include: { item: true, variant: true } } },
   });
   return NextResponse.json({ summary: computeSummary(updated.items), items: updated.items });
 }

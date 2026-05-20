@@ -1,15 +1,16 @@
 "use client";
 import { useState, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
-import type { ItemCatalog, Project, ProjectItem } from "@prisma/client";
+import type { ItemCatalog, Project, ProjectItem, ProductVariant } from "@prisma/client";
 import { CategoryTabs } from "./CategoryTabs";
 import { ItemRow } from "./ItemRow";
 import { SummarySidebar } from "./SummarySidebar";
+import { VariantPickerModal } from "./VariantPickerModal";
 import type { ProjectSummary } from "@/server/project-summary";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
-type ProjectWithItems = Project & { items: (ProjectItem & { item: ItemCatalog })[] };
+type ProjectWithItems = Project & { items: (ProjectItem & { item: ItemCatalog; variant: ProductVariant | null })[] };
 type Category = ItemCatalog["category"];
 
 export function ChecklistView({
@@ -25,6 +26,7 @@ export function ChecklistView({
   const [tab, setTab] = useState<Category>("workstations");
   const [items, setItems] = useState(project.items);
   const [summary, setSummary] = useState(initialSummary);
+  const [pickerForItemId, setPickerForItemId] = useState<string | null>(null);
 
   const byCategory = useMemo(() => {
     const map = new Map<Category, ItemCatalog[]>();
@@ -39,7 +41,7 @@ export function ChecklistView({
   const lineFor = (itemId: string) => items.find((l) => l.itemId === itemId);
 
   const upsertMut = useMutation({
-    mutationFn: async (input: { itemId: string; quantity: number; mode: "new" | "used" }) => {
+    mutationFn: async (input: { itemId: string; quantity: number; mode: "new" | "used"; variantId?: string | null }) => {
       const res = await fetch(`/api/v1/projects/${project.id}/items`, {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -52,7 +54,7 @@ export function ChecklistView({
   });
 
   const patchMut = useMutation({
-    mutationFn: async (input: { lineId: string; quantity?: number; mode?: "new" | "used" }) => {
+    mutationFn: async (input: { lineId: string; quantity?: number; mode?: "new" | "used"; variantId?: string | null }) => {
       const { lineId, ...patch } = input;
       const res = await fetch(`/api/v1/projects/${project.id}/items/${lineId}`, {
         method: "PATCH",
@@ -77,6 +79,17 @@ export function ChecklistView({
     else upsertMut.mutate({ itemId: catalogItem.id, quantity: 1, mode });
   };
 
+  const onPickVariant = (catalogItem: ItemCatalog, variant: ProductVariant | null) => {
+    const line = lineFor(catalogItem.id);
+    if (line) {
+      patchMut.mutate({ lineId: line.id, variantId: variant?.id ?? null });
+    } else {
+      // Picking a variant on a row with qty=0: create the line with qty=1
+      upsertMut.mutate({ itemId: catalogItem.id, quantity: 1, mode: "new", variantId: variant?.id ?? null });
+    }
+    setPickerForItemId(null);
+  };
+
   return (
     <div data-industry={project.industry} style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 32px", display: "grid", gridTemplateColumns: "1fr 360px", gap: 48 }}>
       <div>
@@ -89,6 +102,7 @@ export function ChecklistView({
               line={lineFor(item.id)}
               onQuantity={(q) => onQuantity(item, q)}
               onMode={(m) => onMode(item, m)}
+              onChooseModel={() => setPickerForItemId(item.id)}
             />
           ))}
         </div>
@@ -102,6 +116,20 @@ export function ChecklistView({
           {t("checklist.continueToFloorplan")}
         </Link>
       </div>
+
+      {pickerForItemId && (() => {
+        const cat = catalog.find((c) => c.id === pickerForItemId);
+        if (!cat) return null;
+        const currentVariantId = lineFor(pickerForItemId)?.variantId ?? null;
+        return (
+          <VariantPickerModal
+            item={cat}
+            currentVariantId={currentVariantId}
+            onClose={() => setPickerForItemId(null)}
+            onPick={(variant) => onPickVariant(cat, variant)}
+          />
+        );
+      })()}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { computeSummary } from "@/server/project-summary";
 const patchSchema = z.object({
   quantity: z.number().int().min(0).max(9999).optional(),
   mode: z.enum(["new", "used"]).optional(),
+  variantId: z.string().uuid().nullable().optional(),
 });
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string; lineId: string }> }) {
@@ -25,7 +26,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string; l
 
   const updated = await db.project.findUniqueOrThrow({
     where: { id },
-    include: { items: { include: { item: true } } },
+    include: { items: { include: { item: true, variant: true } } },
   });
   return NextResponse.json({ summary: computeSummary(updated.items), items: updated.items });
 }
@@ -37,7 +38,7 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string;
   await db.projectItem.delete({ where: { id: lineId } });
   const updated = await db.project.findUniqueOrThrow({
     where: { id },
-    include: { items: { include: { item: true } } },
+    include: { items: { include: { item: true, variant: true } } },
   });
   return NextResponse.json({ summary: computeSummary(updated.items), items: updated.items });
 }

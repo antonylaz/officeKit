@@ -68,7 +68,7 @@ export async function createProjectWithGhostCompany(input: CreateProjectInput) {
 export async function getAuthorizedProject(projectId: string) {
   const project = await db.project.findUnique({
     where: { id: projectId },
-    include: { items: { include: { item: true } } },
+    include: { items: { include: { item: true, variant: true } } },
   });
   if (!project) return null;
 

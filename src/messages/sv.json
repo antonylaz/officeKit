@@ -57,7 +57,18 @@
       "total": "Total uppskattning",
       "cityPrefix": "Ditt kontor i"
     },
-    "continueToFloorplan": "Fortsätt till planritning →"
+    "continueToFloorplan": "Fortsätt till planritning →",
+    "chooseModel": "Välj modell"
+  },
+  "variantPicker": {
+    "title": "Välj variant",
+    "pickThis": "Välj denna",
+    "picked": "Vald",
+    "stayGeneric": "Stanna med generisk",
+    "findUsedBlocket": "Hitta begagnat på Blocket",
+    "findUsedTradera": "Hitta begagnat på Tradera",
+    "usedFrom": "eller begagnat från ~{price}",
+    "noVariants": "Inga varianter tillgängliga ännu."
   },
   "floorplan": {
     "title": "Din planritning",
