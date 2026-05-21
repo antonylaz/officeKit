@@ -2,6 +2,8 @@
 import { useEffect, useReducer, useMemo, useState } from "react";
 import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 import { restrictToParentElement } from "@dnd-kit/modifiers";
+import { motion } from "framer-motion";
+import { ArrowRight, Sliders } from "lucide-react";
 import type { ItemCatalog, Project, ProjectItem } from "@prisma/client";
 import { reducer, initialState, type PlacedItem } from "./state";
 import { Canvas } from "./Canvas";
@@ -18,8 +20,17 @@ type ProjectWithItems = Project & { items: (ProjectItem & { item: ItemCatalog })
 export function FloorPlanView({ project }: { project: ProjectWithItems }) {
   const t = useTranslations();
   const initialPlaced: PlacedItem[] = useMemo(() => {
-    const fp = (project.floorPlanData as { placed_items?: Array<{ uid?: number; item_id: string; x: number; y: number; mode?: "new" | "used" }> } | null) ?? {};
-    return (fp.placed_items ?? []).map((p, idx) => ({ uid: p.uid ?? idx + 1, itemId: p.item_id, x: p.x, y: p.y, mode: p.mode ?? "new" }));
+    const fp =
+      (project.floorPlanData as
+        | { placed_items?: Array<{ uid?: number; item_id: string; x: number; y: number; mode?: "new" | "used" }> }
+        | null) ?? {};
+    return (fp.placed_items ?? []).map((p, idx) => ({
+      uid: p.uid ?? idx + 1,
+      itemId: p.item_id,
+      x: p.x,
+      y: p.y,
+      mode: p.mode ?? "new",
+    }));
   }, [project.floorPlanData]);
 
   const [state, dispatch] = useReducer(reducer, initialState({ width: 22, height: 15 }, initialPlaced));
@@ -37,7 +48,13 @@ export function FloorPlanView({ project }: { project: ProjectWithItems }) {
           floorPlanData: {
             canvas: { width_cells: state.canvas.width, height_cells: state.canvas.height },
             rooms,
-            placed_items: state.placed.map((p) => ({ uid: p.uid, item_id: p.itemId, x: p.x, y: p.y, mode: p.mode })),
+            placed_items: state.placed.map((p) => ({
+              uid: p.uid,
+              item_id: p.itemId,
+              x: p.x,
+              y: p.y,
+              mode: p.mode,
+            })),
           },
         }),
       });
@@ -65,18 +82,50 @@ export function FloorPlanView({ project }: { project: ProjectWithItems }) {
 
   return (
     <DndContext modifiers={[restrictToParentElement]} onDragEnd={onDragEnd}>
-      <div data-industry={project.industry} style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 32, maxWidth: 1280, margin: "0 auto", padding: 32 }}>
+      <div
+        data-industry={project.industry}
+        className="max-w-[1280px] mx-auto px-8 py-12 grid gap-8"
+        style={{ gridTemplateColumns: "280px 1fr" }}
+      >
         <Palette projectItems={project.items} placed={state.placed} />
+
         <div>
-          <div style={{ marginBottom: 24 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mb-8"
+          >
+            <p className="text-xs uppercase tracking-[0.14em]" style={{ color: "var(--color-ink-mute)" }}>
+              {project.city} · {project.headcount} {t("supplier.rfq.people")}
+            </p>
+            <h1
+              className="mt-2 text-4xl tracking-tight"
+              style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+            >
+              Floor plan
+            </h1>
+          </motion.div>
+
+          <div className="mb-6">
             <FloorPlanImageUpload
               projectId={project.id}
               currentImageUrl={floorPlanImageUrl}
               onUploaded={setFloorPlanImageUrl}
             />
             {floorPlanImageUrl && (
-              <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
-                <label style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-ink-mute)" }}>
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="mt-3 inline-flex items-center gap-3 px-4 py-2 rounded-full border bg-white"
+                style={{ borderColor: "var(--color-line)" }}
+              >
+                <Sliders className="size-3.5" style={{ color: "var(--color-ink-mute)" }} />
+                <label
+                  className="text-[11px] uppercase tracking-[0.12em] font-semibold"
+                  style={{ color: "var(--color-ink-mute)" }}
+                >
                   {t("floorplan.upload.opacity")}
                 </label>
                 <input
@@ -86,12 +135,18 @@ export function FloorPlanView({ project }: { project: ProjectWithItems }) {
                   step={0.05}
                   value={imageOpacity}
                   onChange={(e) => setImageOpacity(Number(e.target.value))}
-                  style={{ flex: 1, maxWidth: 240 }}
+                  className="w-40"
                 />
-                <span style={{ fontSize: 12, color: "var(--color-ink-mute)", minWidth: 40 }}>{Math.round(imageOpacity * 100)}%</span>
-              </div>
+                <span
+                  className="text-xs tabular-nums w-10 text-right"
+                  style={{ color: "var(--color-ink-soft)" }}
+                >
+                  {Math.round(imageOpacity * 100)}%
+                </span>
+              </motion.div>
             )}
           </div>
+
           <Canvas
             state={state}
             rooms={rooms}
@@ -101,11 +156,14 @@ export function FloorPlanView({ project }: { project: ProjectWithItems }) {
             backgroundImageUrl={floorPlanImageUrl}
             backgroundOpacity={imageOpacity}
           />
+
           <Link
             href={`/projects/${project.id}/request`}
-            style={{ display: "inline-block", marginTop: 24, padding: "16px 24px", background: "var(--ok-accent)", color: "white", textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, fontWeight: 600, borderRadius: 4, textDecoration: "none" }}
+            className="mt-6 inline-flex items-center gap-2 px-7 py-4 rounded-lg text-white text-xs uppercase tracking-[0.12em] font-semibold shadow-md hover:shadow-lg transition-shadow"
+            style={{ background: "var(--color-terracotta)" }}
           >
             {t("common.cta.requestQuotes")}
+            <ArrowRight className="size-4" />
           </Link>
         </div>
       </div>

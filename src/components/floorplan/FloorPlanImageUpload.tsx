@@ -1,8 +1,8 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { motion } from "framer-motion";
 import { Upload, X, FileText, Image as ImageIcon, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const ACCEPT_ATTR = "image/png,image/jpeg,image/webp,application/pdf";
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -31,7 +31,6 @@ export function FloorPlanImageUpload({ projectId, currentImageUrl, onUploaded }:
 
       let uploadFile = file;
 
-      // PDFs: render page 1 to PNG client-side via pdfjs-dist
       if (file.type === "application/pdf") {
         setUploading(true);
         try {
@@ -84,27 +83,49 @@ export function FloorPlanImageUpload({ projectId, currentImageUrl, onUploaded }:
     }
   }, [projectId, onUploaded, t]);
 
-  // Already has an image — render preview + remove
   if (currentImageUrl) {
     return (
-      <div className="relative rounded-lg overflow-hidden border border-border bg-card">
-        <div className="aspect-[16/10] bg-muted overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="relative rounded-2xl overflow-hidden border bg-card shadow-sm"
+        style={{ borderColor: "var(--color-line)" }}
+      >
+        <div className="aspect-[16/8] overflow-hidden" style={{ background: "var(--color-paper)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={currentImageUrl} alt="Floor plan" className="w-full h-full object-contain" />
         </div>
-        <div className="flex items-center justify-between px-4 py-3 bg-card">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("uploaded")}</p>
-          <Button variant="ghost" size="sm" onClick={handleRemove} disabled={uploading}>
-            {uploading ? <Loader2 className="size-4 animate-spin" /> : <X className="size-4" />}
-            <span className="ml-2">{t("remove")}</span>
-          </Button>
+        <div
+          className="flex items-center justify-between px-4 py-3"
+          style={{ borderTop: "1px solid var(--color-line)" }}
+        >
+          <p
+            className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] font-semibold"
+            style={{ color: "var(--color-ink-mute)" }}
+          >
+            <ImageIcon className="size-3.5" style={{ color: "var(--color-green-leaf)" }} />
+            {t("uploaded")}
+          </p>
+          <button
+            onClick={handleRemove}
+            disabled={uploading}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors hover:bg-accent/40 disabled:opacity-50"
+            style={{ color: "var(--color-ink-soft)" }}
+          >
+            {uploading ? <Loader2 className="size-3.5 animate-spin" /> : <X className="size-3.5" />}
+            {t("remove")}
+          </button>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
       onDragOver={(e) => {
         e.preventDefault();
         setDragOver(true);
@@ -116,10 +137,12 @@ export function FloorPlanImageUpload({ projectId, currentImageUrl, onUploaded }:
         const file = e.dataTransfer.files[0];
         if (file) handleFile(file);
       }}
-      className={`relative rounded-lg border-2 border-dashed transition-all p-10 text-center cursor-pointer ${
-        dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-accent/30"
-      }`}
       onClick={() => inputRef.current?.click()}
+      className="relative rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-all"
+      style={{
+        borderColor: dragOver ? "var(--color-terracotta)" : "var(--color-line)",
+        background: dragOver ? "rgba(197, 85, 45, 0.04)" : "var(--color-paper)",
+      }}
     >
       <input
         ref={inputRef}
@@ -135,40 +158,56 @@ export function FloorPlanImageUpload({ projectId, currentImageUrl, onUploaded }:
 
       {uploading ? (
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="size-10 text-primary animate-spin" />
-          <p className="text-sm text-muted-foreground">{t("processing")}</p>
+          <Loader2 className="size-10 animate-spin" style={{ color: "var(--color-terracotta)" }} />
+          <p className="text-sm" style={{ color: "var(--color-ink-mute)" }}>
+            {t("processing")}
+          </p>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3">
-          <div className="flex gap-2">
-            <ImageIcon className="size-8 text-muted-foreground" />
-            <Upload className="size-10 text-primary" />
-            <FileText className="size-8 text-muted-foreground" />
+          <div
+            className="size-16 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(197, 85, 45, 0.08)" }}
+          >
+            <Upload className="size-7" style={{ color: "var(--color-terracotta)" }} />
           </div>
-          <p className="text-base font-medium">{t("dropOrClick")}</p>
-          <p className="text-xs text-muted-foreground">{t("formats")}</p>
+          <div>
+            <p className="text-base font-medium" style={{ color: "var(--color-ink)" }}>
+              {t("dropOrClick")}
+            </p>
+            <div
+              className="mt-1.5 inline-flex items-center gap-2 text-xs"
+              style={{ color: "var(--color-ink-mute)" }}
+            >
+              <FileText className="size-3.5" />
+              {t("formats")}
+            </div>
+          </div>
         </div>
       )}
 
       {error && (
-        <p className="absolute left-0 right-0 bottom-2 text-xs text-destructive px-4">{error}</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute left-0 right-0 bottom-3 text-xs px-4"
+          style={{ color: "var(--color-terracotta)" }}
+        >
+          {error}
+        </motion.p>
       )}
-    </div>
+    </motion.div>
   );
 }
 
 async function renderPdfFirstPageToPng(file: File): Promise<File> {
-  // Dynamic import keeps pdfjs out of the initial bundle (~500KB)
-  // Use the legacy build to avoid worker-loader issues with Turbopack
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  // Use a CDN worker — Turbopack-friendly, no bundling step required
   pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`;
 
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
   const page = await pdf.getPage(1);
 
-  // Render at 2x scale for sharpness on retina screens
   const viewport = page.getViewport({ scale: 2 });
   const canvas = document.createElement("canvas");
   canvas.width = viewport.width;
