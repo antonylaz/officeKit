@@ -111,13 +111,13 @@ export function ChecklistView({
       <div>
         <div className="mb-8">
           <p className="text-xs uppercase tracking-[0.14em]" style={{ color: "var(--color-ink-mute)" }}>
-            {project.city} · {project.headcount} {t("supplier.rfq.people")}
+            {project.city} · {project.headcount} {t("supplier.rfq.people")} · {project.industry.toUpperCase()}
           </p>
           <h1
             className="mt-2 text-4xl tracking-tight"
             style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
           >
-            {project.name}
+            {t("checklist.pageTitle")}
           </h1>
         </div>
 

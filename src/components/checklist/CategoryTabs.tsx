@@ -41,7 +41,7 @@ export function CategoryTabs({
           <button
             key={c}
             onClick={() => onChange(c)}
-            className="relative inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium border transition-colors"
+            className="relative isolate inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium border transition-colors"
             style={{
               borderColor: isActive ? "transparent" : "var(--color-line)",
               color: isActive ? "white" : "var(--color-ink)",
@@ -50,13 +50,13 @@ export function CategoryTabs({
             {isActive && (
               <motion.span
                 layoutId="activeTab"
-                className="absolute inset-0 rounded-full -z-10"
-                style={{ background: "var(--color-ink)" }}
+                className="absolute inset-0 rounded-full"
+                style={{ background: "var(--color-ink)", zIndex: -1 }}
                 transition={{ type: "spring", duration: 0.4, bounce: 0.2 }}
               />
             )}
-            <Icon className="size-3.5" />
-            {t(c)}
+            <Icon className="size-3.5 relative" />
+            <span className="relative">{t(c)}</span>
           </button>
         );
       })}
