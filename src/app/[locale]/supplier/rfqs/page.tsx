@@ -13,9 +13,18 @@ export default async function SupplierRfqsPage({ searchParams }: { searchParams:
   const { rfqs, total } = await listInbox(supplierId, { status });
   const t = await getTranslations("supplier.inbox");
   return (
-    <div style={{ maxWidth: 1280 }}>
-      <h1 style={{ fontFamily: "var(--font-display)", fontSize: 40 }}>{t("title")}</h1>
-      <p style={{ color: "var(--color-ink-mute)", marginTop: 8 }}>{total} {t("totalRequests")}</p>
+    <div className="max-w-[1280px]">
+      <div>
+        <p className="text-xs uppercase tracking-[0.14em]" style={{ color: "var(--color-ink-mute)" }}>
+          {total} {t("totalRequests")}
+        </p>
+        <h1
+          className="mt-2 text-4xl tracking-tight"
+          style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+        >
+          {t("title")}
+        </h1>
+      </div>
       <RfqInbox rfqs={rfqs} activeStatus={status} />
     </div>
   );

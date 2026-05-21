@@ -257,6 +257,8 @@
       "totalRequests": "total",
       "empty": "No RFQs match this filter.",
       "closesIn": "Closes in",
+      "itemsShort": "items",
+      "expiredLabel": "Expired",
       "filter_all": "All",
       "filter_sent": "New",
       "filter_viewed": "Viewed",

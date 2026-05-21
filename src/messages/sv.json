@@ -257,6 +257,8 @@
       "totalRequests": "totalt",
       "empty": "Inga förfrågningar matchar detta filter.",
       "closesIn": "Stänger om",
+      "itemsShort": "artiklar",
+      "expiredLabel": "Utgången",
       "filter_all": "Alla",
       "filter_sent": "Nya",
       "filter_viewed": "Visade",
