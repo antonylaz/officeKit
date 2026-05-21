@@ -7,13 +7,15 @@ import type { ItemCatalog, Project, ProjectItem, ProductVariant } from "@prisma/
 import { CategoryTabs } from "./CategoryTabs";
 import { ItemRow } from "./ItemRow";
 import { SummarySidebar } from "./SummarySidebar";
-import { VariantPickerModal } from "./VariantPickerModal";
+import { ItemDetailDrawer, type DrawerState } from "./ItemDetailDrawer";
 import type { ProjectSummary } from "@/server/project-summary";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { groupItemsBySubcategory } from "@/lib/group-items";
 
-type ProjectWithItems = Project & { items: (ProjectItem & { item: ItemCatalog; variant: ProductVariant | null })[] };
+type ProjectWithItems = Project & {
+  items: (ProjectItem & { item: ItemCatalog; variant: ProductVariant | null })[];
+};
 type Category = ItemCatalog["category"];
 
 export function ChecklistView({
@@ -29,7 +31,7 @@ export function ChecklistView({
   const [tab, setTab] = useState<Category>("workstations");
   const [items, setItems] = useState(project.items);
   const [summary, setSummary] = useState(initialSummary);
-  const [pickerForItemId, setPickerForItemId] = useState<string | null>(null);
+  const [openItemId, setOpenItemId] = useState<string | null>(null);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   const byCategory = useMemo(() => {
@@ -45,7 +47,12 @@ export function ChecklistView({
   const lineFor = (itemId: string) => items.find((l) => l.itemId === itemId);
 
   const upsertMut = useMutation({
-    mutationFn: async (input: { itemId: string; quantity: number; mode: "new" | "used"; variantId?: string | null }) => {
+    mutationFn: async (input: {
+      itemId: string;
+      quantity: number;
+      mode: "new" | "used";
+      variantId?: string | null;
+    }) => {
       const res = await fetch(`/api/v1/projects/${project.id}/items`, {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -61,7 +68,12 @@ export function ChecklistView({
   });
 
   const patchMut = useMutation({
-    mutationFn: async (input: { lineId: string; quantity?: number; mode?: "new" | "used"; variantId?: string | null }) => {
+    mutationFn: async (input: {
+      lineId: string;
+      quantity?: number;
+      mode?: "new" | "used";
+      variantId?: string | null;
+    }) => {
       const { lineId, ...patch } = input;
       const res = await fetch(`/api/v1/projects/${project.id}/items/${lineId}`, {
         method: "PATCH",
@@ -77,27 +89,44 @@ export function ChecklistView({
     },
   });
 
-  const onQuantity = (catalogItem: ItemCatalog, qty: number) => {
-    const line = lineFor(catalogItem.id);
-    if (line) patchMut.mutate({ lineId: line.id, quantity: qty });
-    else if (qty > 0) upsertMut.mutate({ itemId: catalogItem.id, quantity: qty, mode: "new" });
-  };
-
-  const onMode = (catalogItem: ItemCatalog, mode: "new" | "used") => {
-    const line = lineFor(catalogItem.id);
-    if (line) patchMut.mutate({ lineId: line.id, mode });
-    else upsertMut.mutate({ itemId: catalogItem.id, quantity: 1, mode });
-  };
-
-  const onPickVariant = (catalogItem: ItemCatalog, variant: ProductVariant | null) => {
+  function applyChange(catalogItem: ItemCatalog, change: Partial<DrawerState>) {
     const line = lineFor(catalogItem.id);
     if (line) {
-      patchMut.mutate({ lineId: line.id, variantId: variant?.id ?? null });
-    } else {
-      upsertMut.mutate({ itemId: catalogItem.id, quantity: 1, mode: "new", variantId: variant?.id ?? null });
+      patchMut.mutate({ lineId: line.id, ...change });
+    } else if (change.quantity && change.quantity > 0) {
+      upsertMut.mutate({
+        itemId: catalogItem.id,
+        quantity: change.quantity,
+        mode: change.mode ?? "new",
+        variantId: change.variantId ?? null,
+      });
+    } else if (change.variantId !== undefined || change.mode !== undefined) {
+      // Variant/mode set before quantity — create line with qty 1
+      upsertMut.mutate({
+        itemId: catalogItem.id,
+        quantity: 1,
+        mode: change.mode ?? "new",
+        variantId: change.variantId ?? null,
+      });
     }
-    setPickerForItemId(null);
+  }
+
+  const onQuantityRow = (catalogItem: ItemCatalog, qty: number) =>
+    applyChange(catalogItem, { quantity: qty });
+
+  // Drawer state derived from current line
+  const openItem = openItemId ? catalog.find((c) => c.id === openItemId) ?? null : null;
+  const openLine = openItemId ? lineFor(openItemId) : null;
+  const drawerState: DrawerState = {
+    variantId: openLine?.variantId ?? null,
+    mode: openLine?.mode ?? "new",
+    quantity: openLine?.quantity ?? 0,
   };
+
+  function onDrawerUpdate(patch: Partial<DrawerState>) {
+    if (!openItem) return;
+    applyChange(openItem, patch);
+  }
 
   const tabItems = byCategory.get(tab) ?? [];
   const { groups, ungrouped } = groupItemsBySubcategory(tabItems);
@@ -106,7 +135,7 @@ export function ChecklistView({
     <div
       data-industry={project.industry}
       className="max-w-[1280px] mx-auto px-8 py-12 grid gap-12"
-      style={{ gridTemplateColumns: "1fr 360px" }}
+      style={{ gridTemplateColumns: "minmax(0, 1fr) 340px" }}
     >
       <div>
         <div className="mb-8">
@@ -134,31 +163,24 @@ export function ChecklistView({
             const groupKey = `${tab}:${group.key}`;
             const open = openGroups[groupKey] ?? true;
             return (
-              <div
-                key={group.key}
-                className="mb-6 border rounded-2xl overflow-hidden"
-                style={{ borderColor: "var(--color-line)", background: "var(--color-paper)" }}
-              >
+              <div key={group.key} className="mb-6">
                 <button
                   type="button"
                   onClick={() => setOpenGroups((s) => ({ ...s, [groupKey]: !open }))}
-                  className="w-full flex items-center justify-between px-5 py-3.5 select-none transition-colors hover:brightness-[0.98]"
-                  style={{ background: "var(--color-cream-2, var(--color-cream))" }}
+                  className="w-full flex items-center justify-between px-1 py-2 select-none transition-opacity hover:opacity-80"
                 >
                   <span
                     className="text-[11px] font-semibold uppercase tracking-[0.14em]"
                     style={{ color: "var(--color-ink-mute)" }}
                   >
                     {t(`subcategory.${group.key}`)}
-                  </span>
-                  <span className="flex items-center gap-3">
-                    <span className="text-[11px]" style={{ color: "var(--color-ink-mute)" }}>
-                      {group.items.length}
+                    <span className="ml-2" style={{ color: "var(--color-ink-mute)" }}>
+                      · {group.items.length}
                     </span>
-                    <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                      <ChevronDown className="size-4" style={{ color: "var(--color-ink-mute)" }} />
-                    </motion.span>
                   </span>
+                  <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronDown className="size-4" style={{ color: "var(--color-ink-mute)" }} />
+                  </motion.span>
                 </button>
                 <AnimatePresence initial={false}>
                   {open && (
@@ -170,15 +192,14 @@ export function ChecklistView({
                       transition={{ duration: 0.2 }}
                       style={{ overflow: "hidden" }}
                     >
-                      <div className="px-5 pb-4 pt-2">
+                      <div className="pt-3">
                         {group.items.map((item) => (
                           <ItemRow
                             key={item.id}
                             item={item}
                             line={lineFor(item.id)}
-                            onQuantity={(q) => onQuantity(item, q)}
-                            onMode={(m) => onMode(item, m)}
-                            onChooseModel={() => setPickerForItemId(item.id)}
+                            onQuantity={(q) => onQuantityRow(item, q)}
+                            onOpen={() => setOpenItemId(item.id)}
                           />
                         ))}
                       </div>
@@ -188,16 +209,19 @@ export function ChecklistView({
               </div>
             );
           })}
-          {ungrouped.map((item) => (
-            <ItemRow
-              key={item.id}
-              item={item}
-              line={lineFor(item.id)}
-              onQuantity={(q) => onQuantity(item, q)}
-              onMode={(m) => onMode(item, m)}
-              onChooseModel={() => setPickerForItemId(item.id)}
-            />
-          ))}
+          {ungrouped.length > 0 && (
+            <div className="pt-2">
+              {ungrouped.map((item) => (
+                <ItemRow
+                  key={item.id}
+                  item={item}
+                  line={lineFor(item.id)}
+                  onQuantity={(q) => onQuantityRow(item, q)}
+                  onOpen={() => setOpenItemId(item.id)}
+                />
+              ))}
+            </div>
+          )}
         </motion.div>
       </div>
 
@@ -213,20 +237,12 @@ export function ChecklistView({
         </Link>
       </div>
 
-      {pickerForItemId &&
-        (() => {
-          const cat = catalog.find((c) => c.id === pickerForItemId);
-          if (!cat) return null;
-          const currentVariantId = lineFor(pickerForItemId)?.variantId ?? null;
-          return (
-            <VariantPickerModal
-              item={cat}
-              currentVariantId={currentVariantId}
-              onClose={() => setPickerForItemId(null)}
-              onPick={(variant) => onPickVariant(cat, variant)}
-            />
-          );
-        })()}
+      <ItemDetailDrawer
+        item={openItem}
+        state={drawerState}
+        onClose={() => setOpenItemId(null)}
+        onUpdate={onDrawerUpdate}
+      />
     </div>
   );
 }
