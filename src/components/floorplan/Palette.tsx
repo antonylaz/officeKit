@@ -1,68 +1,152 @@
 "use client";
+import { useState, useMemo } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { GripVertical } from "lucide-react";
+import { Search } from "lucide-react";
 import type { ItemCatalog, ProjectItem } from "@prisma/client";
 import type { PlacedItem } from "./state";
 
-export function Palette({
-  projectItems,
-  placed,
-}: {
+interface PaletteProps {
   projectItems: (ProjectItem & { item: ItemCatalog })[];
   placed: PlacedItem[];
-}) {
+}
+
+export function Palette({ projectItems, placed }: PaletteProps) {
+  const [query, setQuery] = useState("");
   const placedCount = (itemId: string) => placed.filter((p) => p.itemId === itemId).length;
-  const activeItems = projectItems.filter((p) => p.quantity > 0);
+  const activeItems = useMemo(
+    () => projectItems.filter((p) => p.quantity > 0),
+    [projectItems],
+  );
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return activeItems;
+    const q = query.toLowerCase();
+    return activeItems.filter(
+      (p) => p.item.name.toLowerCase().includes(q) || p.item.category.toLowerCase().includes(q),
+    );
+  }, [activeItems, query]);
+
+  // Group by category for visual sectioning
+  const byCategory = useMemo(() => {
+    const map = new Map<string, typeof filtered>();
+    for (const p of filtered) {
+      const arr = map.get(p.item.category) ?? [];
+      arr.push(p);
+      map.set(p.item.category, arr);
+    }
+    return map;
+  }, [filtered]);
 
   return (
     <aside
-      className="rounded-2xl border p-4 max-h-[70vh] overflow-y-auto sticky top-8 self-start"
-      style={{ borderColor: "var(--color-line)", background: "var(--color-paper)" }}
+      className="rounded-2xl border sticky top-8 self-start overflow-hidden flex flex-col"
+      style={{
+        borderColor: "var(--color-line)",
+        background: "var(--color-paper)",
+        maxHeight: "calc(100vh - 64px)",
+      }}
     >
-      <div className="flex items-baseline justify-between mb-4">
-        <h3 className="text-lg" style={{ fontFamily: "var(--font-display)" }}>
-          Palette
-        </h3>
-        <span
-          className="text-[10px] uppercase tracking-[0.12em] font-semibold"
-          style={{ color: "var(--color-ink-mute)" }}
-        >
-          {activeItems.length} items
-        </span>
+      <div className="px-3 py-3 border-b" style={{ borderColor: "var(--color-line)" }}>
+        <div className="flex items-baseline justify-between mb-2 px-1">
+          <h3 className="text-sm font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+            Palette
+          </h3>
+          <span
+            className="text-[10px] uppercase tracking-[0.1em] font-semibold tabular-nums"
+            style={{ color: "var(--color-ink-mute)" }}
+          >
+            {activeItems.length}
+          </span>
+        </div>
+        <div className="relative">
+          <Search
+            className="absolute left-2 top-1/2 -translate-y-1/2 size-3"
+            style={{ color: "var(--color-ink-mute)" }}
+          />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search…"
+            className="w-full rounded-md border pl-7 pr-2 py-1.5 text-xs outline-none focus:ring-2 transition-shadow"
+            style={{ background: "white", borderColor: "var(--color-line)" }}
+          />
+        </div>
       </div>
-      <div className="grid gap-2">
-        {activeItems.map((p) => (
-          <PaletteCard key={p.itemId} item={p.item} placed={placedCount(p.itemId)} total={p.quantity} />
+
+      <div className="flex-1 overflow-y-auto p-2 space-y-3">
+        {[...byCategory.entries()].map(([category, items]) => (
+          <div key={category}>
+            <p
+              className="px-1 pb-1 text-[9px] uppercase tracking-[0.14em] font-semibold"
+              style={{ color: "var(--color-ink-mute)" }}
+            >
+              {category}
+            </p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {items.map((p) => (
+                <PaletteChip
+                  key={p.itemId}
+                  item={p.item}
+                  placed={placedCount(p.itemId)}
+                  total={p.quantity}
+                />
+              ))}
+            </div>
+          </div>
         ))}
+        {filtered.length === 0 && (
+          <p
+            className="text-center text-xs py-6"
+            style={{ color: "var(--color-ink-mute)" }}
+          >
+            No matches
+          </p>
+        )}
       </div>
     </aside>
   );
 }
 
-function PaletteCard({ item, placed, total }: { item: ItemCatalog; placed: number; total: number }) {
+function PaletteChip({ item, placed, total }: { item: ItemCatalog; placed: number; total: number }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: `palette:${item.id}` });
-  const allPlaced = placed >= total;
+  const remaining = total - placed;
+  const allPlaced = remaining <= 0;
+
   return (
-    <div
+    <button
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className="flex items-center gap-2.5 p-2.5 rounded-lg border bg-white cursor-grab active:cursor-grabbing transition-all hover:shadow-sm"
+      disabled={allPlaced}
+      title={`${item.name} — ${placed}/${total}`}
+      className="group relative aspect-square rounded-lg border flex items-center justify-center text-xl transition-all cursor-grab active:cursor-grabbing hover:shadow-sm focus:outline-none focus:ring-2 disabled:opacity-40 disabled:cursor-not-allowed"
       style={{
+        background: "white",
         borderColor: "var(--color-line)",
-        opacity: isDragging ? 0.4 : 1,
+        opacity: isDragging ? 0.4 : undefined,
       }}
+      aria-label={`${item.name}: ${placed} of ${total} placed`}
     >
-      <GripVertical className="size-4 shrink-0" style={{ color: "var(--color-ink-mute)" }} />
-      <span className="text-xl shrink-0" aria-hidden>
-        {item.icon}
+      <span aria-hidden>{item.icon}</span>
+
+      {/* Count badge */}
+      <span
+        className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-[9px] font-bold tabular-nums shadow-sm"
+        style={{
+          background: allPlaced ? "var(--color-green-leaf)" : "var(--color-ink)",
+          color: "white",
+        }}
+      >
+        {allPlaced ? "✓" : remaining}
       </span>
-      <div className="flex-1 min-w-0 text-[13px]">
-        <div className="font-semibold truncate">{item.name}</div>
-        <div className="text-[11px]" style={{ color: allPlaced ? "var(--color-green-leaf)" : "var(--color-ink-mute)" }}>
-          {placed} of {total} placed
-        </div>
-      </div>
-    </div>
+
+      {/* Tooltip on hover */}
+      <span
+        className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 rounded-md text-[10px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        style={{ background: "var(--color-ink)", color: "white" }}
+      >
+        {item.name}
+      </span>
+    </button>
   );
 }

@@ -85,7 +85,7 @@ export function FloorPlanView({ project }: { project: ProjectWithItems }) {
       <div
         data-industry={project.industry}
         className="max-w-[1280px] mx-auto px-8 py-12 grid gap-8"
-        style={{ gridTemplateColumns: "280px 1fr" }}
+        style={{ gridTemplateColumns: "220px minmax(0, 1fr)" }}
       >
         <Palette projectItems={project.items} placed={state.placed} />
 

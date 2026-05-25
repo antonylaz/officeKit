@@ -1,3 +1,4 @@
+import { MapPin, Trophy, Leaf, Check, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { formatSek } from "@/lib/money";
 import { getTranslations } from "next-intl/server";
@@ -9,7 +10,10 @@ type RfqWithQuote = Rfq & {
 };
 
 export async function QuoteCard({
-  rfq, projectId, isBestValue, isSustainabilityLeader,
+  rfq,
+  projectId,
+  isBestValue,
+  isSustainabilityLeader,
 }: {
   rfq: RfqWithQuote;
   projectId: string;
@@ -18,25 +22,104 @@ export async function QuoteCard({
 }) {
   const t = await getTranslations("buyer.quotes");
   if (!rfq.quote) return null;
+
+  const hasBadge = isBestValue || isSustainabilityLeader;
+
   return (
-    <article style={{ background: "var(--color-paper)", border: "1px solid var(--color-line)", borderRadius: 4, padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", minHeight: 24 }}>
-        {isBestValue && <span style={{ padding: "4px 10px", background: "var(--color-gold)", color: "white", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", borderRadius: 100 }}>{t("badges.bestValue")}</span>}
-        {isSustainabilityLeader && <span style={{ padding: "4px 10px", background: "var(--color-green-leaf)", color: "white", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", borderRadius: 100 }}>{t("badges.sustainability")}</span>}
+    <article
+      className="relative flex flex-col gap-4 rounded-2xl border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+      style={{
+        background: "var(--color-paper)",
+        borderColor: hasBadge ? "var(--color-terracotta)" : "var(--color-line)",
+        boxShadow: hasBadge ? "0 0 0 1px var(--color-terracotta) inset" : undefined,
+      }}
+    >
+      {/* Badges (always reserve space) */}
+      <div className="flex gap-2 flex-wrap min-h-6">
+        {isBestValue && (
+          <span
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] uppercase tracking-[0.1em] font-bold text-white"
+            style={{ background: "var(--color-gold)" }}
+          >
+            <Trophy className="size-3" />
+            {t("badges.bestValue")}
+          </span>
+        )}
+        {isSustainabilityLeader && (
+          <span
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] uppercase tracking-[0.1em] font-bold text-white"
+            style={{ background: "var(--color-green-leaf)" }}
+          >
+            <Leaf className="size-3" />
+            {t("badges.sustainability")}
+          </span>
+        )}
       </div>
-      <h3 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0 }}>{rfq.supplier.name}</h3>
-      <p style={{ color: "var(--color-ink-mute)", fontSize: 13, margin: 0 }}>{rfq.supplier.coverageAreas.join(", ")}</p>
-      <p style={{ fontFamily: "var(--font-display)", fontSize: 36, margin: 0, color: "var(--color-terracotta)" }}>{formatSek(rfq.quote.totalAmount)}</p>
-      <p style={{ color: "var(--color-ink-soft)", fontSize: 13, margin: 0 }}>{t("inclVat")}</p>
+
+      {/* Supplier */}
+      <div>
+        <h3 className="text-2xl tracking-tight m-0" style={{ fontFamily: "var(--font-display)" }}>
+          {rfq.supplier.name}
+        </h3>
+        <p
+          className="mt-1 inline-flex items-center gap-1 text-[13px]"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          <MapPin className="size-3" />
+          {rfq.supplier.coverageAreas.join(", ")}
+        </p>
+      </div>
+
+      {/* Price */}
+      <div>
+        <p
+          className="text-4xl tracking-tight tabular-nums m-0"
+          style={{ fontFamily: "var(--font-display)", color: "var(--color-terracotta)" }}
+        >
+          {formatSek(rfq.quote.totalAmount)}
+        </p>
+        <p
+          className="mt-1 text-[12px] uppercase tracking-[0.1em] font-semibold"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          {t("inclVat")}
+        </p>
+      </div>
+
+      {/* Perks */}
       {rfq.quote.perks.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 4, fontSize: 13 }}>
-          {rfq.quote.perks.map((p) => <li key={p} style={{ color: "var(--color-ink-soft)" }}>✓ {p}</li>)}
+        <ul className="m-0 p-0 space-y-1.5 list-none text-[13px]">
+          {rfq.quote.perks.map((p) => (
+            <li
+              key={p}
+              className="flex items-start gap-2"
+              style={{ color: "var(--color-ink-soft)" }}
+            >
+              <Check className="size-3.5 mt-0.5 shrink-0" style={{ color: "var(--color-green-leaf)" }} />
+              <span>{p}</span>
+            </li>
+          ))}
         </ul>
       )}
-      {rfq.quote.notes && <p style={{ color: "var(--color-ink-soft)", fontSize: 13, fontStyle: "italic" }}>&quot;{rfq.quote.notes}&quot;</p>}
-      <Link href={`/projects/${projectId}/quotes/${rfq.quote.id}/confirm`}
-        style={{ marginTop: "auto", display: "block", textAlign: "center", padding: "14px 24px", background: "var(--ok-accent)", color: "white", textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, fontWeight: 600, borderRadius: 4, textDecoration: "none" }}>
+
+      {/* Note */}
+      {rfq.quote.notes && (
+        <p
+          className="text-[13px] italic border-l-2 pl-3"
+          style={{ color: "var(--color-ink-soft)", borderColor: "var(--color-line)" }}
+        >
+          &quot;{rfq.quote.notes}&quot;
+        </p>
+      )}
+
+      {/* CTA — sticks to bottom */}
+      <Link
+        href={`/projects/${projectId}/quotes/${rfq.quote.id}/confirm`}
+        className="mt-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-lg text-white text-xs uppercase tracking-[0.1em] font-semibold shadow-sm hover:shadow-md transition-shadow"
+        style={{ background: "var(--color-terracotta)", textDecoration: "none" }}
+      >
         {t("choose", { name: rfq.supplier.name })}
+        <ArrowRight className="size-3.5" />
       </Link>
     </article>
   );
