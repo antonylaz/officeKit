@@ -81,7 +81,11 @@ export function FloorPlanView({ project }: { project: ProjectWithItems }) {
   }
 
   return (
-    <DndContext modifiers={[restrictToParentElement]} onDragEnd={onDragEnd}>
+    <DndContext
+      id="floorplan-dnd"
+      modifiers={[restrictToParentElement]}
+      onDragEnd={onDragEnd}
+    >
       <div
         data-industry={project.industry}
         className="max-w-[1280px] mx-auto px-8 py-12 grid gap-8"
