@@ -164,7 +164,7 @@ export function FloorPlanView({ project }: { project: ProjectWithItems }) {
           <Link
             href={`/projects/${project.id}/request`}
             className="mt-6 inline-flex items-center gap-2 px-7 py-4 rounded-lg text-white text-xs uppercase tracking-[0.12em] font-semibold shadow-md hover:shadow-lg transition-shadow"
-            style={{ background: "var(--color-terracotta)" }}
+            style={{ background: "var(--color-cta)" }}
           >
             {t("common.cta.requestQuotes")}
             <ArrowRight className="size-4" />

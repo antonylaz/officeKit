@@ -116,7 +116,7 @@ export async function QuoteCard({
       <Link
         href={`/projects/${projectId}/quotes/${rfq.quote.id}/confirm`}
         className="mt-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-lg text-white text-xs uppercase tracking-[0.1em] font-semibold shadow-sm hover:shadow-md transition-shadow"
-        style={{ background: "var(--color-terracotta)", textDecoration: "none" }}
+        style={{ background: "var(--color-cta)", textDecoration: "none" }}
       >
         {t("choose", { name: rfq.supplier.name })}
         <ArrowRight className="size-3.5" />

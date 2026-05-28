@@ -22,7 +22,7 @@ export function RecoveryCodesDisplay({ codes, onContinue }: { codes: string[]; o
           {t("download")}
         </button>
         <button onClick={onContinue}
-          style={{ background: "var(--color-terracotta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
+          style={{ background: "var(--color-cta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
           {t("continue")} →
         </button>
       </div>

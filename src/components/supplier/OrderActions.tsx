@@ -49,7 +49,7 @@ export function OrderActions({ orderId, status, canCancel }: { orderId: string; 
               style={{ background: "var(--color-cream)", border: "1px solid var(--color-line)", borderRadius: 4, padding: "10px 12px" }} />
           )}
           <button onClick={advance} disabled={submitting}
-            style={{ background: "var(--color-terracotta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
+            style={{ background: "var(--color-cta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
             Mark as {next.replace("_", " ")}
           </button>
         </div>
@@ -67,7 +67,7 @@ export function OrderActions({ orderId, status, canCancel }: { orderId: string; 
                 style={{ background: "var(--color-cream)", border: "1px solid var(--color-line)", borderRadius: 4, padding: 12, fontFamily: "var(--font-body)" }} />
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={cancel} disabled={submitting || !cancelReason}
-                  style={{ background: "var(--color-terracotta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", fontSize: 12, cursor: "pointer" }}>
+                  style={{ background: "var(--color-cta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", fontSize: 12, cursor: "pointer" }}>
                   Confirm cancel
                 </button>
                 <button onClick={() => setCancelOpen(false)} style={{ background: "transparent", border: "1px solid var(--color-line)", padding: "12px 24px", borderRadius: 4, fontSize: 12, cursor: "pointer" }}>

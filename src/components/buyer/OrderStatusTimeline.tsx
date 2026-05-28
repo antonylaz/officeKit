@@ -59,7 +59,7 @@ export function OrderStatusTimeline({ status }: { status: string }) {
                 <div
                   className="size-6 rounded-full flex items-center justify-center ring-4"
                   style={{
-                    background: "var(--color-terracotta)",
+                    background: "var(--color-cta)",
                     boxShadow: "0 0 0 4px rgba(197, 85, 45, 0.15)",
                   }}
                 >

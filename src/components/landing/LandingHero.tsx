@@ -85,7 +85,7 @@ export function LandingHero({ tagline, headline, subhead, ctaStart, ctaAi, beta,
           <Link
             href="/start"
             className="inline-flex items-center gap-2 h-12 px-7 text-sm uppercase tracking-[0.12em] font-semibold rounded-md text-white shadow-md hover:shadow-lg transition-shadow"
-            style={{ background: "var(--color-terracotta)" }}
+            style={{ background: "var(--color-cta)" }}
           >
             {ctaStart}
             <ArrowRight className="size-4" />

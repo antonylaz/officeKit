@@ -41,7 +41,7 @@ export function AdminOrderActions({ orderId, currentStatus }: { orderId: string;
           <select value={status} onChange={(e) => setStatus(e.target.value)} style={{ background: "var(--color-cream)", border: "1px solid var(--color-line)", borderRadius: 4, padding: "8px 12px" }}>
             {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
-          <button onClick={override} disabled={submitting || status === currentStatus} style={{ background: "var(--color-terracotta)", color: "white", padding: "8px 16px", border: "none", borderRadius: 4, fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", cursor: "pointer" }}>
+          <button onClick={override} disabled={submitting || status === currentStatus} style={{ background: "var(--color-cta)", color: "white", padding: "8px 16px", border: "none", borderRadius: 4, fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", cursor: "pointer" }}>
             Apply
           </button>
         </div>
@@ -55,7 +55,7 @@ export function AdminOrderActions({ orderId, currentStatus }: { orderId: string;
             <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" rows={3}
               style={{ background: "var(--color-cream)", border: "1px solid var(--color-line)", borderRadius: 4, padding: 12 }} />
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={refund} disabled={submitting || !reason} style={{ background: "var(--color-terracotta)", color: "white", padding: "8px 16px", border: "none", borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Confirm refund</button>
+              <button onClick={refund} disabled={submitting || !reason} style={{ background: "var(--color-cta)", color: "white", padding: "8px 16px", border: "none", borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Confirm refund</button>
               <button onClick={() => setRefundOpen(false)} style={{ background: "transparent", border: "1px solid var(--color-line)", padding: "8px 16px", borderRadius: 4, fontSize: 12, cursor: "pointer" }}>Cancel</button>
             </div>
           </div>

@@ -272,7 +272,7 @@ export function ItemDetailDrawer({ item, state, onClose, onUpdate }: Props) {
               <button
                 onClick={onClose}
                 className="px-6 py-3 rounded-lg text-xs uppercase tracking-[0.12em] font-semibold text-white shadow-sm hover:shadow-md transition-shadow"
-                style={{ background: "var(--color-terracotta)" }}
+                style={{ background: "var(--color-cta)" }}
               >
                 Done
               </button>
@@ -405,7 +405,7 @@ function VariantOption({
         {selected && (
           <div
             className="mt-1.5 inline-flex items-center justify-center size-5 rounded-full ml-auto"
-            style={{ background: "var(--color-terracotta)" }}
+            style={{ background: "var(--color-cta)" }}
           >
             <Check className="size-3 text-white" />
           </div>

@@ -35,7 +35,7 @@ export function SupplierEditForm({ id, name: initName, commissionRate: initCR, a
         Active
       </label>
       <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-        <button onClick={save} disabled={saving} style={{ background: "var(--color-terracotta)", color: "white", padding: "10px 20px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
+        <button onClick={save} disabled={saving} style={{ background: "var(--color-cta)", color: "white", padding: "10px 20px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
           {saving ? "…" : "Save"}
         </button>
         {saved && <span style={{ color: "var(--color-green-leaf)", fontSize: 13 }}>Saved ✓</span>}

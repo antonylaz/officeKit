@@ -175,7 +175,7 @@ function VariantCard({
         {selected && (
           <div
             className="absolute top-3 right-3 size-7 rounded-full flex items-center justify-center shadow-md"
-            style={{ background: "var(--color-terracotta)" }}
+            style={{ background: "var(--color-cta)" }}
           >
             <Check className="size-4 text-white" />
           </div>

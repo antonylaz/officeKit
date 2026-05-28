@@ -314,7 +314,7 @@ export function QuoteBuilder({ rfq, competitorCount }: { rfq: RfqWithEverything;
                 onClick={submit}
                 disabled={submitting || lines.length === 0}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-white text-xs uppercase tracking-[0.1em] font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ background: "var(--color-terracotta)" }}
+                style={{ background: "var(--color-cta)" }}
               >
                 {submitting ? (
                   <>
