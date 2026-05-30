@@ -41,6 +41,37 @@ function significantTokens(s: string): string[] {
     .filter((t) => t.length >= 4 && !STOP_TOKENS.has(t));
 }
 
+// Hyphenated tokens that are tier/modifier markers, not product identifiers.
+// Examples: "mid-tier ergonomic task chair", "phone booth, single-person",
+// "meeting table, 6-person", "personal locker (8-compartment)"
+const MODIFIER_HYPHEN_RE = /^(mid|low|high|single|double|triple)-\w+$/;
+const MODIFIER_SIZE_SUFFIX_RE = /^\d+-(tier|person|compartment|seater)$/;
+
+function isModifierHyphenated(token: string): boolean {
+  return MODIFIER_HYPHEN_RE.test(token) || MODIFIER_SIZE_SUFFIX_RE.test(token);
+}
+
+/**
+ * Build "must-contain" phrases from an item name with collision-avoidance.
+ *
+ * Rule:
+ *   1. Drop modifier-hyphen tokens ("mid-tier", "6-person", "8-compartment") — these
+ *      are tier/size markers, not product identity.
+ *   2. If real hyphenated identifiers remain (e.g. "sit-stand", "Bean-to-cup", "27-inch"),
+ *      use ONLY those. Also add a space-separated variant so "sit stand" matches.
+ *   3. Otherwise require ALL non-hyphenated significant tokens to match (AND).
+ *      Prevents "Dell 4K monitor" cross-matching with "Single monitor arm".
+ */
+function buildMatchTerms(itemName: string): { mode: "any" | "all"; terms: string[] } {
+  const tokens = significantTokens(itemName).filter((t) => !isModifierHyphenated(t));
+  const hyphenated = tokens.filter((t) => t.includes("-"));
+  if (hyphenated.length > 0) {
+    const expanded = hyphenated.flatMap((t) => [t, t.replace(/-/g, " ")]);
+    return { mode: "any", terms: expanded };
+  }
+  return { mode: "all", terms: tokens };
+}
+
 export async function findMatchingListings(
   catalogItemId: string,
   itemName: string,
@@ -56,19 +87,19 @@ export async function findMatchingListings(
     take: 8,
   });
 
-  // Fallback: per-token OR across the description
-  const tokens = significantTokens(itemName);
-  const byTokens = tokens.length === 0
+  // Fallback: phrase match on description. Hyphenated terms use OR (any match);
+  // generic tokens use AND (all must match) to avoid cross-item collisions.
+  const { mode, terms } = buildMatchTerms(itemName);
+  const containsClauses = terms.map((tok) => ({
+    description: { contains: tok, mode: "insensitive" as const },
+  }));
+  const byTokens = terms.length === 0
     ? []
     : await db.listingItem.findMany({
         where: {
           AND: [
             { catalogItemId: null },
-            {
-              OR: tokens.map((tok) => ({
-                description: { contains: tok, mode: "insensitive" as const },
-              })),
-            },
+            mode === "any" ? { OR: containsClauses } : { AND: containsClauses },
             { listing: { status: { in: ["approved", "listed"] } } },
           ],
         },
