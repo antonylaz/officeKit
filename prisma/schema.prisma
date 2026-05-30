@@ -426,12 +426,42 @@ model Listing {
   status          ListingStatus   @default(submitted)
   notes           String?
   items           ListingItem[]
+  photos          ListingPhoto[]
+  interests       ListingInterest[]
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
 
   @@index([status, createdAt])
   @@index([contactEmail])
   @@map("listings")
+}
+
+model ListingPhoto {
+  id          String   @id @default(uuid())
+  listingId   String   @map("listing_id")
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url         String
+  caption     String?
+  displayOrder Int     @default(0) @map("display_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([listingId, displayOrder])
+  @@map("listing_photos")
+}
+
+model ListingInterest {
+  id            String   @id @default(uuid())
+  listingId     String   @map("listing_id")
+  listing       Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerEmail    String   @map("buyer_email")
+  buyerName     String   @map("buyer_name")
+  buyerCompany  String?  @map("buyer_company")
+  message       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([listingId, createdAt])
+  @@index([buyerEmail])
+  @@map("listing_interests")
 }
 
 model ListingItem {

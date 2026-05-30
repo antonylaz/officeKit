@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { X, Check, Plus, Minus, ExternalLink, Loader2, Leaf, MapPin } from "lucide-react";
+import { ExpressInterestButton } from "@/components/listing/ExpressInterestButton";
 import { formatSek } from "@/lib/money";
 import type { ItemCatalog, ProductVariant, ItemCondition } from "@prisma/client";
 
@@ -362,66 +363,90 @@ function MatchCard({ match, buyerCity }: { match: MatchingListing; buyerCity?: s
   const local = buyerCity != null && match.city.toLowerCase() === buyerCity.toLowerCase();
   return (
     <div
-      className="p-3 rounded-xl border flex items-start gap-3"
+      className="p-3 rounded-xl border"
       style={{
         background: "rgba(27, 48, 38, 0.04)",
         borderColor: "rgba(27, 48, 38, 0.2)",
       }}
     >
-      <div
-        className="size-10 shrink-0 rounded-lg flex items-center justify-center"
-        style={{ background: "rgba(27, 48, 38, 0.1)" }}
-      >
-        <Leaf className="size-4" style={{ color: "var(--color-forest)" }} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <p className="text-[13px] font-medium leading-tight truncate" style={{ color: "var(--color-ink)" }}>
-            {match.description}
-          </p>
-          <span
-            className="text-[10px] uppercase tracking-[0.08em] font-semibold"
+      <div className="flex items-start gap-3">
+        <div
+          className="size-10 shrink-0 rounded-lg flex items-center justify-center"
+          style={{ background: "rgba(27, 48, 38, 0.1)" }}
+        >
+          <Leaf className="size-4" style={{ color: "var(--color-forest)" }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <p className="text-[13px] font-medium leading-tight truncate" style={{ color: "var(--color-ink)" }}>
+              {match.description}
+            </p>
+            <span
+              className="text-[10px] uppercase tracking-[0.08em] font-semibold"
+              style={{ color: "var(--color-ink-mute)" }}
+            >
+              ×{match.quantity}
+            </span>
+          </div>
+          <div
+            className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px]"
             style={{ color: "var(--color-ink-mute)" }}
           >
-            ×{match.quantity}
-          </span>
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="size-2.5" />
+              {match.city}
+              {local && (
+                <span
+                  className="ml-1 px-1 rounded text-[9px] uppercase tracking-[0.06em] font-bold"
+                  style={{ background: "var(--color-forest)", color: "white" }}
+                >
+                  Local
+                </span>
+              )}
+            </span>
+            <span>{CONDITION_LABEL[match.condition]}</span>
+            <span style={{ textTransform: "capitalize" }}>{match.reason}</span>
+          </div>
         </div>
-        <div
-          className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px]"
-          style={{ color: "var(--color-ink-mute)" }}
-        >
-          <span className="inline-flex items-center gap-1">
-            <MapPin className="size-2.5" />
-            {match.city}
-            {local && (
-              <span
-                className="ml-1 px-1 rounded text-[9px] uppercase tracking-[0.06em] font-bold"
-                style={{ background: "var(--color-forest)", color: "white" }}
-              >
-                Local
-              </span>
-            )}
-          </span>
-          <span>{CONDITION_LABEL[match.condition]}</span>
-          <span style={{ textTransform: "capitalize" }}>{match.reason}</span>
+        <div className="text-right shrink-0">
+          {match.askingPriceOre != null ? (
+            <div
+              className="font-semibold text-[13px] tabular-nums"
+              style={{ color: "var(--color-forest)" }}
+            >
+              {formatSek(match.askingPriceOre)}
+            </div>
+          ) : (
+            <div className="text-[11px] italic" style={{ color: "var(--color-ink-mute)" }}>
+              Make offer
+            </div>
+          )}
+          <div className="text-[10px]" style={{ color: "var(--color-ink-mute)" }}>
+            per unit
+          </div>
         </div>
       </div>
-      <div className="text-right shrink-0">
-        {match.askingPriceOre != null ? (
-          <div
-            className="font-semibold text-[13px] tabular-nums"
-            style={{ color: "var(--color-forest)" }}
-          >
-            {formatSek(match.askingPriceOre)}
-          </div>
-        ) : (
-          <div className="text-[11px] italic" style={{ color: "var(--color-ink-mute)" }}>
-            Make offer
-          </div>
-        )}
-        <div className="text-[10px]" style={{ color: "var(--color-ink-mute)" }}>
-          per unit
-        </div>
+      <div
+        className="mt-3 pt-3 flex items-center gap-3 border-t"
+        style={{ borderColor: "rgba(27, 48, 38, 0.12)" }}
+      >
+        <a
+          href={`/sv/listings/${match.listingId}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-[11px] uppercase tracking-[0.08em] font-semibold hover:underline"
+          style={{ color: "var(--color-forest)" }}
+        >
+          View full listing →
+        </a>
+        <span style={{ color: "var(--color-ink-mute)" }}>·</span>
+        <ExpressInterestButton
+          listingId={match.listingId}
+          companyName="this seller"
+          variant="ghost"
+          size="sm"
+          label="Express interest"
+        />
       </div>
     </div>
   );
