@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { Resend } from "resend";
 import { db } from "@/lib/db";
+import { ListingReceivedEmail } from "@/emails/ListingReceived";
 
 const listingItemSchema = z.object({
   catalogItemId: z.string().nullable().optional(),
@@ -51,6 +53,30 @@ export async function POST(req: Request) {
       },
     },
   });
+
+  // Fire-and-forget seller confirmation email (no-op if RESEND_API_KEY missing)
+  if (process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL) {
+    const localeHeader = req.headers.get("accept-language") ?? "";
+    const locale: "sv" | "en" = localeHeader.toLowerCase().startsWith("sv") ? "sv" : "en";
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL,
+        to: listing.contactEmail,
+        subject: locale === "sv" ? "Tack — vi har fått er annons" : "Thanks — we've got your listing",
+        react: ListingReceivedEmail({
+          contactName: listing.contactName,
+          companyName: listing.companyName,
+          itemCount: data.items.length,
+          listingId: listing.id,
+          locale,
+        }),
+      });
+    } catch (err) {
+      // Don't fail the listing if email fails — surface in server log only
+      console.error("Listing confirmation email failed:", err);
+    }
+  }
 
   return NextResponse.json({ id: listing.id });
 }

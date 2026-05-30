@@ -240,6 +240,7 @@ export function ChecklistView({
       <ItemDetailDrawer
         item={openItem}
         state={drawerState}
+        buyerCity={project.city}
         onClose={() => setOpenItemId(null)}
         onUpdate={onDrawerUpdate}
       />

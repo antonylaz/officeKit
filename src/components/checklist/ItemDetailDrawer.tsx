@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { X, Check, Plus, Minus, ExternalLink, Loader2 } from "lucide-react";
+import { X, Check, Plus, Minus, ExternalLink, Loader2, Leaf, MapPin } from "lucide-react";
 import { formatSek } from "@/lib/money";
-import type { ItemCatalog, ProductVariant } from "@prisma/client";
+import type { ItemCatalog, ProductVariant, ItemCondition } from "@prisma/client";
 
 export interface DrawerState {
   variantId: string | null;
@@ -12,19 +12,33 @@ export interface DrawerState {
   quantity: number;
 }
 
+interface MatchingListing {
+  listingId: string;
+  city: string;
+  reason: string;
+  moveOutDate: string | null;
+  description: string;
+  quantity: number;
+  condition: ItemCondition;
+  askingPriceOre: number | null;
+}
+
 interface Props {
   item: ItemCatalog | null;
   state: DrawerState;
+  buyerCity?: string;
   onClose: () => void;
   onUpdate: (patch: Partial<DrawerState>) => void;
 }
 
-export function ItemDetailDrawer({ item, state, onClose, onUpdate }: Props) {
+export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: Props) {
   const t = useTranslations();
   // Keyed by itemId so we don't have to setState synchronously to clear
   const [variantsByItemId, setVariantsByItemId] = useState<Record<string, ProductVariant[]>>({});
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+  const [matchingByItemId, setMatchingByItemId] = useState<Record<string, MatchingListing[]>>({});
   const variants = item ? variantsByItemId[item.id] ?? [] : [];
+  const matching = item ? matchingByItemId[item.id] ?? [] : [];
   const loading = item != null && loadingItemId === item.id && !variantsByItemId[item.id];
 
   useEffect(() => {
@@ -49,6 +63,28 @@ export function ItemDetailDrawer({ item, state, onClose, onUpdate }: Props) {
       cancelled = true;
     };
   }, [item, variantsByItemId]);
+
+  // Fetch matching used listings (separate effect so a slow listings query doesn't block variants)
+  useEffect(() => {
+    if (!item || matchingByItemId[item.id]) return;
+    let cancelled = false;
+    const id = item.id;
+    const url = buyerCity
+      ? `/api/v1/catalog/items/${id}/matching-listings?city=${encodeURIComponent(buyerCity)}`
+      : `/api/v1/catalog/items/${id}/matching-listings`;
+    fetch(url)
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        setMatchingByItemId((prev) => ({ ...prev, [id]: d.listings ?? [] }));
+      })
+      .catch(() => {
+        // Soft fail — drawer keeps working without used matches
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [item, buyerCity, matchingByItemId]);
 
   useEffect(() => {
     if (!item) return;
@@ -186,6 +222,26 @@ export function ItemDetailDrawer({ item, state, onClose, onUpdate }: Props) {
                 )}
               </section>
 
+              {/* Matching resale listings */}
+              {matching.length > 0 && (
+                <section>
+                  <SectionLabel>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Leaf className="size-3" style={{ color: "var(--color-forest)" }} />
+                      Available used near you · {matching.length}
+                    </span>
+                  </SectionLabel>
+                  <p className="mt-1 text-[12px]" style={{ color: "var(--color-ink-mute)" }}>
+                    Sellers closing or downsizing offices have this item available. Reach out via OfficeKit.
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    {matching.slice(0, 3).map((m) => (
+                      <MatchCard key={`${m.listingId}-${m.description}`} match={m} buyerCity={buyerCity} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
               {/* Mode toggle */}
               <section>
                 <SectionLabel>Condition</SectionLabel>
@@ -292,6 +348,82 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     >
       {children}
     </p>
+  );
+}
+
+const CONDITION_LABEL: Record<ItemCondition, string> = {
+  like_new: "Like new",
+  good: "Good",
+  fair: "Fair",
+  worn: "Worn",
+};
+
+function MatchCard({ match, buyerCity }: { match: MatchingListing; buyerCity?: string }) {
+  const local = buyerCity != null && match.city.toLowerCase() === buyerCity.toLowerCase();
+  return (
+    <div
+      className="p-3 rounded-xl border flex items-start gap-3"
+      style={{
+        background: "rgba(27, 48, 38, 0.04)",
+        borderColor: "rgba(27, 48, 38, 0.2)",
+      }}
+    >
+      <div
+        className="size-10 shrink-0 rounded-lg flex items-center justify-center"
+        style={{ background: "rgba(27, 48, 38, 0.1)" }}
+      >
+        <Leaf className="size-4" style={{ color: "var(--color-forest)" }} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <p className="text-[13px] font-medium leading-tight truncate" style={{ color: "var(--color-ink)" }}>
+            {match.description}
+          </p>
+          <span
+            className="text-[10px] uppercase tracking-[0.08em] font-semibold"
+            style={{ color: "var(--color-ink-mute)" }}
+          >
+            ×{match.quantity}
+          </span>
+        </div>
+        <div
+          className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px]"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          <span className="inline-flex items-center gap-1">
+            <MapPin className="size-2.5" />
+            {match.city}
+            {local && (
+              <span
+                className="ml-1 px-1 rounded text-[9px] uppercase tracking-[0.06em] font-bold"
+                style={{ background: "var(--color-forest)", color: "white" }}
+              >
+                Local
+              </span>
+            )}
+          </span>
+          <span>{CONDITION_LABEL[match.condition]}</span>
+          <span style={{ textTransform: "capitalize" }}>{match.reason}</span>
+        </div>
+      </div>
+      <div className="text-right shrink-0">
+        {match.askingPriceOre != null ? (
+          <div
+            className="font-semibold text-[13px] tabular-nums"
+            style={{ color: "var(--color-forest)" }}
+          >
+            {formatSek(match.askingPriceOre)}
+          </div>
+        ) : (
+          <div className="text-[11px] italic" style={{ color: "var(--color-ink-mute)" }}>
+            Make offer
+          </div>
+        )}
+        <div className="text-[10px]" style={{ color: "var(--color-ink-mute)" }}>
+          per unit
+        </div>
+      </div>
+    </div>
   );
 }
 
