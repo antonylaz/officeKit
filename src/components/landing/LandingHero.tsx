@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Recycle, Clock, Users } from "lucide-react";
+import { ArrowRight, Sparkles, Recycle, Clock, Users, Leaf } from "lucide-react";
 import { Link } from "@/i18n/routing";
 
 interface Stat {
@@ -103,6 +103,14 @@ export function LandingHero({ tagline, headline, subhead, ctaStart, ctaAi, beta,
             >
               {beta}
             </span>
+          </Link>
+          <Link
+            href="/sell"
+            className="inline-flex items-center gap-2 h-12 px-6 text-sm uppercase tracking-[0.12em] font-semibold rounded-md border transition-colors hover:bg-accent/40"
+            style={{ borderColor: "var(--color-forest)", color: "var(--color-forest)" }}
+          >
+            <Leaf className="size-4" />
+            Sell furniture
           </Link>
         </motion.div>
 

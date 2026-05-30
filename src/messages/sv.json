@@ -39,6 +39,106 @@
       "createFailed": "Det gick inte att skapa projektet. Kontrollera dina uppgifter."
     }
   },
+  "sell": {
+    "landing": {
+      "eyebrow": "Sälj kontorsmöbler",
+      "title": "Stänger ni kontoret?",
+      "titleAccent": "Sälj möblerna här.",
+      "subtitle": "Få betalt för era befintliga möbler istället för att skicka dem till tippen. Vi matchar er med köpare som söker exakt det ni har.",
+      "cta": "Skapa annons",
+      "steps": {
+        "1": {
+          "title": "Lista det ni har",
+          "desc": "Beskriv möblerna kort — antal, skick och eventuellt pris. Tar ungefär 5 minuter."
+        },
+        "2": {
+          "title": "Vi matchar",
+          "desc": "Vi kopplar er med köpare som efterfrågar liknande utrustning, eller köper själva direkt vid större mängder."
+        },
+        "3": {
+          "title": "Ni får betalt",
+          "desc": "Köparen står för upphämtning. Betalning sker via OfficeKit innan upphämtningen sker — säkert för båda parter."
+        }
+      },
+      "why": {
+        "title": "Varför sälja via OfficeKit?",
+        "a": "Cirkulärt: möblerna får ett andra liv istället för att hamna på tippen. Ni minskar er klimatpåverkan dokumenterat.",
+        "b": "Snabbt: vi har redan köparbasen — många nya kontor söker just nu begagnade möbler för budget och hållbarhet.",
+        "c": "Inga avgifter att starta. Vi tar en liten matchningsavgift först vid avslutad försäljning."
+      },
+      "faq": {
+        "1": {
+          "q": "Vilka möbler kan jag sälja?",
+          "a": "Allt från enskilda stolar och bord till hela kontorsinventarier. Vi är särskilt intresserade av höj- och sänkbara skrivbord, ergonomiska stolar, mötesbord, förvaring och AV-utrustning."
+        },
+        "2": {
+          "q": "Hur sätter ni pris?",
+          "a": "Ni föreslår pris (eller lämnar fältet tomt så ger vi en uppskattning baserat på liknande möbler i vår katalog). Köpare kan lägga bud — ni bestämmer alltid om ni accepterar."
+        },
+        "3": {
+          "q": "Kostar det något?",
+          "a": "Att lista är gratis. Vi tar 10 % matchningsavgift först när en försäljning slutförts. Inga avgifter om inget säljs."
+        }
+      }
+    },
+    "form": {
+      "eyebrow": "Skapa annons",
+      "title": "Berätta vad ni vill sälja",
+      "subtitle": "Vi återkommer inom 24 timmar med en uppskattad värdering och nästa steg. Ni behöver inte ladda upp bilder nu — vi ber om det vid intresse.",
+      "sections": {
+        "company": "Företag och kontakt",
+        "items": "Det ni säljer",
+        "itemsHint": "Lista varje typ av möbel separat. Lägg till så många rader som behövs.",
+        "notes": "Ytterligare information",
+        "notesHint": "Något särskilt vi bör veta? Tidskänslighet, plats för upphämtning, paketdeal, etc."
+      },
+      "fields": {
+        "companyName": "Företagsnamn",
+        "contactName": "Kontaktperson",
+        "contactEmail": "E-post",
+        "contactPhone": "Telefon",
+        "city": "Stad",
+        "moveOutDate": "Utflyttningsdatum",
+        "reason": "Anledning",
+        "itemDescription": "Vad det är",
+        "quantity": "Antal",
+        "condition": "Skick",
+        "askingPrice": "Önskat pris (SEK / styck)",
+        "notesPlaceholder": "T.ex. Vi flyttar 15 september, möblerna står klara för upphämtning i Solna…"
+      },
+      "reason": {
+        "closing": "Stänger kontoret",
+        "downsizing": "Drar ner",
+        "moving": "Flyttar",
+        "refurbishing": "Renoverar",
+        "other": "Annat"
+      },
+      "condition": {
+        "like_new": "Som nytt",
+        "good": "Bra",
+        "fair": "Tjänstbart",
+        "worn": "Slitet"
+      },
+      "addItem": "Lägg till artikel",
+      "submit": "Skicka in",
+      "submitting": "Skickar",
+      "submitHint": "Vi återkommer inom 24 timmar.",
+      "errors": {
+        "submit": "Kunde inte skicka — försök igen.",
+        "network": "Nätverksfel — försök igen om en stund."
+      }
+    },
+    "thanks": {
+      "title": "Tack — vi har fått er annons.",
+      "subtitle": "Vi har registrerat {itemCount} rader för {companyName}. Ett mejl med bekräftelse är på väg.",
+      "nextStepsTitle": "Vad händer nu?",
+      "step1": "En av oss läser igenom annonsen och återkommer inom 24 timmar med en uppskattad värdering.",
+      "step2": "Om ni godkänner publicerar vi annonsen och matchar mot pågående köpprojekt.",
+      "step3": "Vid intresserad köpare koordinerar vi upphämtning och betalning åt er.",
+      "backHome": "Tillbaka till start",
+      "anotherListing": "Skapa en till"
+    }
+  },
   "aiBuild": {
     "eyebrow": "Bygg ditt kontor med AI",
     "ctaLanding": "Bygg med AI",

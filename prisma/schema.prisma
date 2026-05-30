@@ -193,6 +193,7 @@ model ItemCatalog {
   supplierPricing   SupplierPricing[]
   quoteLines        QuoteLine[]
   variants          ProductVariant[]
+  listingItems      ListingItem[]
   createdAt         DateTime     @default(now()) @map("created_at")
   updatedAt         DateTime     @updatedAt @map("updated_at")
 
@@ -387,4 +388,63 @@ model Order {
   updatedAt               DateTime      @updatedAt @map("updated_at")
 
   @@map("orders")
+}
+
+enum ListingStatus {
+  submitted
+  reviewing
+  approved
+  listed
+  sold
+  withdrawn
+}
+
+enum ListingReason {
+  closing
+  downsizing
+  moving
+  refurbishing
+  other
+}
+
+enum ItemCondition {
+  like_new
+  good
+  fair
+  worn
+}
+
+model Listing {
+  id              String          @id @default(uuid())
+  companyName     String          @map("company_name")
+  contactName     String          @map("contact_name")
+  contactEmail    String          @map("contact_email")
+  contactPhone    String?         @map("contact_phone")
+  city            String
+  moveOutDate     DateTime?       @map("move_out_date") @db.Date
+  reason          ListingReason   @default(other)
+  status          ListingStatus   @default(submitted)
+  notes           String?
+  items           ListingItem[]
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@index([contactEmail])
+  @@map("listings")
+}
+
+model ListingItem {
+  id             String        @id @default(uuid())
+  listingId      String        @map("listing_id")
+  listing        Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  catalogItemId  String?       @map("catalog_item_id")
+  catalogItem    ItemCatalog?  @relation(fields: [catalogItemId], references: [id])
+  description    String
+  quantity       Int
+  condition      ItemCondition
+  askingPriceOre Int?          @map("asking_price_ore")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  @@map("listing_items")
 }
