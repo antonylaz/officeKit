@@ -41,7 +41,7 @@ const HEADER_LABELS = {
   },
 } as const;
 
-export function Header() {
+export function Header({ userMenuSlot }: { userMenuSlot?: React.ReactNode } = {}) {
   const locale = useLocale() as "sv" | "en";
   const labels = HEADER_LABELS[locale];
   const pathname = usePathname();
@@ -116,7 +116,7 @@ export function Header() {
           })}
         </nav>
 
-        {/* Right rail — supplier link + locale */}
+        {/* Right rail — supplier link + locale + user menu */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
           <Link
             href="/supplier/login"
@@ -132,6 +132,7 @@ export function Header() {
           >
             {labels.switchLocale}
           </a>
+          {userMenuSlot}
         </div>
 
         {/* Mobile menu trigger */}

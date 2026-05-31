@@ -1,30 +1,52 @@
-import { Link } from "@/i18n/routing";
+import { LayoutDashboard, Inbox, ShoppingBag, Wallet, Settings } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/routing";
+import { SupplierSidebarClient } from "./SidebarClient";
 
 export async function Sidebar() {
   const t = await getTranslations("supplier.nav");
+  const items = [
+    { href: "/supplier", label: t("dashboard"), icon: "dashboard" },
+    { href: "/supplier/rfqs", label: t("rfqs"), icon: "rfqs" },
+    { href: "/supplier/orders", label: t("orders"), icon: "orders" },
+    { href: "/supplier/payouts", label: t("payouts"), icon: "payouts" },
+    { href: "/supplier/settings", label: t("settings"), icon: "settings" },
+  ];
   return (
-    <nav style={{ background: "var(--color-cream)", borderRight: "1px solid var(--color-line)", padding: "32px 24px" }}>
-      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 24 }}>
-        <span style={{ color: "var(--color-ink)" }}>office</span>
-        <span style={{ color: "var(--color-terracotta)", fontWeight: 700 }}>kit.</span>
+    <aside
+      className="border-r flex flex-col"
+      style={{
+        background: "var(--color-paper)",
+        borderColor: "var(--color-line)",
+        minHeight: "100vh",
+      }}
+    >
+      <div className="px-6 py-6">
+        <Link
+          href="/"
+          className="text-2xl font-bold italic"
+          style={{ fontFamily: "var(--font-display)", textDecoration: "none" }}
+        >
+          <span style={{ color: "var(--color-ink)" }}>office</span>
+          <span style={{ color: "var(--color-terracotta)" }}>kit.</span>
+        </Link>
+        <p
+          className="mt-1 text-[10px] uppercase tracking-[0.14em] font-semibold"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          Supplier portal
+        </p>
       </div>
-      <ul style={{ marginTop: 32, listStyle: "none", padding: 0, display: "grid", gap: 8 }}>
-        <li><Link href="/supplier" style={navLink}>{t("dashboard")}</Link></li>
-        <li><Link href="/supplier/rfqs" style={navLink}>{t("rfqs")}</Link></li>
-        <li><Link href="/supplier/orders" style={navLink}>{t("orders")}</Link></li>
-        <li><Link href="/supplier/payouts" style={navLink}>{t("payouts")}</Link></li>
-        <li><Link href="/supplier/settings" style={navLink}>{t("settings")}</Link></li>
-      </ul>
-    </nav>
+      <SupplierSidebarClient items={items} />
+    </aside>
   );
 }
 
-const navLink: React.CSSProperties = {
-  display: "block",
-  padding: "10px 12px",
-  color: "var(--color-ink)",
-  textDecoration: "none",
-  fontSize: 14,
-  borderRadius: 4,
-};
+// Icon helper exposed for the client component to use
+export const SIDEBAR_ICONS = {
+  dashboard: LayoutDashboard,
+  rfqs: Inbox,
+  orders: ShoppingBag,
+  payouts: Wallet,
+  settings: Settings,
+} as const;

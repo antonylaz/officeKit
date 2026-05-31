@@ -1,29 +1,33 @@
 import { Link } from "@/i18n/routing";
+import { AdminSidebarClient } from "./SidebarClient";
 
 export function AdminSidebar() {
   return (
-    <nav style={{ background: "var(--color-cream)", borderRight: "1px solid var(--color-line)", padding: "32px 24px" }}>
-      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 24 }}>
-        <span style={{ color: "var(--color-ink)" }}>office</span>
-        <span style={{ color: "var(--color-terracotta)", fontWeight: 700 }}>kit.</span>
+    <aside
+      className="border-r flex flex-col"
+      style={{
+        background: "var(--color-paper)",
+        borderColor: "var(--color-line)",
+        minHeight: "100vh",
+      }}
+    >
+      <div className="px-6 py-6">
+        <Link
+          href="/"
+          className="text-2xl font-bold italic"
+          style={{ fontFamily: "var(--font-display)", textDecoration: "none" }}
+        >
+          <span style={{ color: "var(--color-ink)" }}>office</span>
+          <span style={{ color: "var(--color-terracotta)" }}>kit.</span>
+        </Link>
+        <p
+          className="mt-1 text-[10px] uppercase tracking-[0.14em] font-semibold"
+          style={{ color: "var(--color-terracotta)" }}
+        >
+          Admin console
+        </p>
       </div>
-      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-terracotta)", marginTop: 4 }}>Admin</p>
-      <ul style={{ marginTop: 32, listStyle: "none", padding: 0, display: "grid", gap: 8 }}>
-        <li><Link href="/admin" style={navLink}>Dashboard</Link></li>
-        <li><Link href="/admin/suppliers" style={navLink}>Suppliers</Link></li>
-        <li><Link href="/admin/orders" style={navLink}>Orders</Link></li>
-        <li><Link href="/admin/buyers" style={navLink}>Buyers</Link></li>
-        <li><Link href="/admin/financials" style={navLink}>Financials</Link></li>
-      </ul>
-    </nav>
+      <AdminSidebarClient />
+    </aside>
   );
 }
-
-const navLink: React.CSSProperties = {
-  display: "block",
-  padding: "10px 12px",
-  color: "var(--color-ink)",
-  textDecoration: "none",
-  fontSize: 14,
-  borderRadius: 4,
-};
