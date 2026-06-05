@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Check, ExternalLink, Loader2 } from "lucide-react";
 import { formatSek } from "@/lib/money";
 import type { ProductVariant, ItemCatalog } from "@prisma/client";
 
@@ -25,93 +27,119 @@ export function VariantPickerModal({ item, currentVariantId, onClose, onPick }: 
         setVariants(d.variants ?? []);
         setLoading(false);
       });
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     document.addEventListener("keydown", onKey);
-    return () => { cancelled = true; document.removeEventListener("keydown", onKey); };
+    return () => {
+      cancelled = true;
+      document.removeEventListener("keydown", onKey);
+    };
   }, [item.id, onClose]);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={t("variantPicker.title")}
-      onClick={onClose}
-      style={{
-        position: "fixed", inset: 0, zIndex: 100,
-        background: "rgba(26, 31, 26, 0.5)",
-        backdropFilter: "blur(4px)",
-        WebkitBackdropFilter: "blur(4px)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 20,
-        animation: "fadeIn var(--transition-default) ease-out",
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
+    <AnimatePresence>
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("variantPicker.title")}
+        onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center p-5"
         style={{
-          background: "white",
-          borderRadius: "var(--radius-modal)",
-          maxWidth: 960, width: "100%",
-          maxHeight: "90vh", overflowY: "auto",
-          padding: 32,
-          boxShadow: "var(--shadow-lg)",
-          animation: "slideUp var(--transition-default) ease-out",
+          background: "rgba(26, 31, 26, 0.55)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <div>
-            <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-ink-mute)", fontWeight: 600 }}>{t("variantPicker.title")}</p>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 32, marginTop: 4, letterSpacing: "-0.02em" }}>{item.name}</h2>
-            <p style={{ color: "var(--color-ink-soft)", marginTop: 8, fontSize: 14 }}>{item.description}</p>
-          </div>
-          <button onClick={onClose} aria-label="close"
-            style={{ background: "transparent", border: "none", fontSize: 24, cursor: "pointer", color: "var(--color-ink-mute)", padding: 8 }}>×</button>
-        </div>
-
-        {loading && <p style={{ marginTop: 32, color: "var(--color-ink-mute)" }}>Loading…</p>}
-
-        {!loading && variants.length === 0 && (
-          <p style={{ marginTop: 32, color: "var(--color-ink-mute)" }}>{t("variantPicker.noVariants")}</p>
-        )}
-
-        {!loading && variants.length > 0 && (
-          <div style={{ marginTop: 28, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
-            {variants.map((v) => (
-              <VariantCard
-                key={v.id}
-                variant={v}
-                selected={currentVariantId === v.id}
-                onPick={() => onPick(v)}
-              />
-            ))}
-          </div>
-        )}
-
-        <button
-          onClick={() => onPick(null)}
-          style={{
-            marginTop: 24,
-            background: "transparent",
-            border: "none",
-            color: "var(--color-ink-mute)",
-            fontSize: 13,
-            cursor: "pointer",
-            textDecoration: "underline",
-          }}
+        <motion.div
+          onClick={(e) => e.stopPropagation()}
+          initial={{ opacity: 0, y: 24, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 24, scale: 0.97 }}
+          transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+          className="bg-white rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-y-auto p-8 shadow-2xl"
         >
-          {t("variantPicker.stayGeneric")}
-        </button>
+          <div className="flex justify-between items-start">
+            <div>
+              <p
+                className="text-[11px] uppercase tracking-[0.12em] font-semibold"
+                style={{ color: "var(--color-ink-mute)" }}
+              >
+                {t("variantPicker.title")}
+              </p>
+              <h2
+                className="mt-1 text-3xl tracking-tight"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {item.name}
+              </h2>
+              <p className="mt-2 text-sm" style={{ color: "var(--color-ink-soft)" }}>
+                {item.description}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              aria-label="close"
+              className="p-2 rounded-full hover:bg-accent/40 transition-colors"
+            >
+              <X className="size-5" style={{ color: "var(--color-ink-mute)" }} />
+            </button>
+          </div>
 
-        <style>{`
-          @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-          @keyframes slideUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: translateY(0) } }
-        `}</style>
-      </div>
-    </div>
+          {loading && (
+            <div className="mt-12 flex flex-col items-center gap-3" style={{ color: "var(--color-ink-mute)" }}>
+              <Loader2 className="size-6 animate-spin" />
+              <p className="text-sm">Loading…</p>
+            </div>
+          )}
+
+          {!loading && variants.length === 0 && (
+            <p className="mt-12 text-center" style={{ color: "var(--color-ink-mute)" }}>
+              {t("variantPicker.noVariants")}
+            </p>
+          )}
+
+          {!loading && variants.length > 0 && (
+            <div className="mt-7 grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))" }}>
+              {variants.map((v, i) => (
+                <motion.div
+                  key={v.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.04 }}
+                >
+                  <VariantCard variant={v} selected={currentVariantId === v.id} onPick={() => onPick(v)} />
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          <button
+            onClick={() => onPick(null)}
+            className="mt-6 text-sm underline hover:no-underline transition-all"
+            style={{ color: "var(--color-ink-mute)" }}
+          >
+            {t("variantPicker.stayGeneric")}
+          </button>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
-function VariantCard({ variant, selected, onPick }: { variant: ProductVariant; selected: boolean; onPick: () => void }) {
+function VariantCard({
+  variant,
+  selected,
+  onPick,
+}: {
+  variant: ProductVariant;
+  selected: boolean;
+  onPick: () => void;
+}) {
   const t = useTranslations("variantPicker");
   const specs = variant.specs as Record<string, string>;
   const specKeys = Object.keys(specs).slice(0, 3);
@@ -123,56 +151,70 @@ function VariantCard({ variant, selected, onPick }: { variant: ProductVariant; s
     : null;
 
   return (
-    <article
+    <motion.article
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
+      className="rounded-2xl overflow-hidden flex flex-col h-full transition-all"
       style={{
         background: selected ? "var(--color-cream-2)" : "white",
         border: `2px solid ${selected ? "var(--color-terracotta)" : "var(--color-line)"}`,
-        borderRadius: "var(--radius-card-lg)",
-        overflow: "hidden",
-        transition: "transform var(--transition-default), box-shadow var(--transition-default), border-color var(--transition-fast)",
-        display: "flex", flexDirection: "column",
         boxShadow: selected ? "var(--shadow-md)" : "var(--shadow-sm)",
       }}
     >
-      <div style={{
-        aspectRatio: "4/3",
-        background: "var(--color-paper)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        position: "relative",
-      }}>
+      <div className="relative aspect-[4/3] overflow-hidden" style={{ background: "var(--color-paper)" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={variant.imageUrl}
           alt={`${variant.manufacturer} ${variant.name}`}
           loading="lazy"
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/variants/_placeholder.svg"; }}
+          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = "/variants/_placeholder.svg";
+          }}
         />
+        {selected && (
+          <div
+            className="absolute top-3 right-3 size-7 rounded-full flex items-center justify-center shadow-md"
+            style={{ background: "var(--color-cta)" }}
+          >
+            <Check className="size-4 text-white" />
+          </div>
+        )}
       </div>
 
-      <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+      <div className="p-4 flex flex-col gap-3 flex-1">
         <div>
-          <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-ink-mute)", fontWeight: 600 }}>{variant.manufacturer}</p>
-          <h3 style={{ fontSize: 16, fontWeight: 600, marginTop: 4, letterSpacing: "-0.01em" }}>{variant.name}</h3>
+          <p
+            className="text-[11px] uppercase tracking-[0.08em] font-semibold"
+            style={{ color: "var(--color-ink-mute)" }}
+          >
+            {variant.manufacturer}
+          </p>
+          <h3 className="mt-1 text-base font-semibold leading-tight">{variant.name}</h3>
         </div>
 
         {specKeys.length > 0 && (
-          <dl style={{ margin: 0, display: "grid", gap: 4, fontSize: 12, color: "var(--color-ink-soft)" }}>
+          <dl className="m-0 grid gap-1 text-xs" style={{ color: "var(--color-ink-soft)" }}>
             {specKeys.map((k) => (
-              <div key={k} style={{ display: "flex", gap: 6 }}>
-                <dt style={{ color: "var(--color-ink-mute)", textTransform: "capitalize" }}>{k}:</dt>
-                <dd style={{ margin: 0 }}>{String(specs[k])}</dd>
+              <div key={k} className="flex gap-1.5">
+                <dt className="capitalize" style={{ color: "var(--color-ink-mute)" }}>
+                  {k}:
+                </dt>
+                <dd className="m-0">{String(specs[k])}</dd>
               </div>
             ))}
           </dl>
         )}
 
-        <div style={{ marginTop: "auto" }}>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "var(--color-terracotta)", fontWeight: 600, margin: 0 }}>
+        <div className="mt-auto">
+          <p
+            className="text-2xl font-semibold m-0"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-terracotta)" }}
+          >
             {formatSek(variant.priceNewOre)}
           </p>
           {variant.priceUsedDefaultOre !== null && (
-            <p style={{ fontSize: 12, color: "var(--color-ink-mute)", margin: "2px 0 0" }}>
+            <p className="text-xs mt-0.5" style={{ color: "var(--color-ink-mute)" }}>
               {t("usedFrom", { price: formatSek(variant.priceUsedDefaultOre) })}
             </p>
           )}
@@ -180,40 +222,48 @@ function VariantCard({ variant, selected, onPick }: { variant: ProductVariant; s
 
         <button
           onClick={onPick}
-          style={{
-            background: selected ? "var(--color-green-leaf)" : "var(--color-terracotta)",
-            color: "white",
-            padding: "10px 16px",
-            border: "none",
-            borderRadius: 8,
-            fontSize: 12,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            cursor: "pointer",
-            transition: "background var(--transition-fast)",
-          }}
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-[0.08em] text-white transition-colors"
+          style={{ background: selected ? "var(--color-green-leaf)" : "var(--color-terracotta)" }}
         >
-          {selected ? "✓ " + t("picked") : t("pickThis")}
+          {selected ? (
+            <>
+              <Check className="size-3.5" />
+              {t("picked")}
+            </>
+          ) : (
+            t("pickThis")
+          )}
         </button>
 
         {(blocketUrl || traderaUrl) && (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className="flex gap-3 flex-wrap pt-1">
             {blocketUrl && (
-              <a href={blocketUrl} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: 11, color: "var(--color-green-leaf)", textDecoration: "underline" }}>
-                {t("findUsedBlocket")} →
+              <a
+                href={blocketUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] underline hover:no-underline"
+                style={{ color: "var(--color-green-leaf)" }}
+              >
+                {t("findUsedBlocket")}
+                <ExternalLink className="size-3" />
               </a>
             )}
             {traderaUrl && (
-              <a href={traderaUrl} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: 11, color: "var(--color-green-leaf)", textDecoration: "underline" }}>
-                {t("findUsedTradera")} →
+              <a
+                href={traderaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] underline hover:no-underline"
+                style={{ color: "var(--color-green-leaf)" }}
+              >
+                {t("findUsedTradera")}
+                <ExternalLink className="size-3" />
               </a>
             )}
           </div>
         )}
       </div>
-    </article>
+    </motion.article>
   );
 }

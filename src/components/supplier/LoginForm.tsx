@@ -46,7 +46,7 @@ export function LoginForm({ defaultRedirect = "/supplier" }: { defaultRedirect?:
       </button>
       {error && <p style={{ color: "var(--color-terracotta)" }}>{error}</p>}
       <button type="submit" disabled={submitting}
-        style={{ background: "var(--color-terracotta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
+        style={{ background: "var(--color-cta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
         {submitting ? "…" : t("submit")} →
       </button>
     </form>

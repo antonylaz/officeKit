@@ -39,7 +39,7 @@ export function RequestForm({ projectId }: { projectId: string }) {
           style={{ background: "var(--color-cream)", border: "1px solid var(--color-line)", borderRadius: 4, padding: "10px 12px" }}
         />
       </label>
-      <button type="submit" disabled={state === "sending"} style={{ background: "var(--color-terracotta)", color: "white", padding: "16px 24px", textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, fontWeight: 600, border: "none", borderRadius: 4, cursor: "pointer" }}>
+      <button type="submit" disabled={state === "sending"} style={{ background: "var(--color-cta)", color: "white", padding: "16px 24px", textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, fontWeight: 600, border: "none", borderRadius: 4, cursor: "pointer" }}>
         {state === "sending" ? "…" : `${t("request.send")} →`}
       </button>
       {state === "error" && <p style={{ color: "var(--color-terracotta)" }}>{t("request.form.error")}</p>}

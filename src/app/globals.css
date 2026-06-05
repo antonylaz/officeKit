@@ -48,34 +48,46 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* OfficeKit design tokens */
+/* OfficeKit design tokens — Nordic Modern Minimal (Phase 11) */
 @theme {
-  --color-cream: #f5f1e8;
-  --color-cream-2: #ebe5d4;
-  --color-paper: #faf7ef;
-  --color-ink: #1a1f1a;
-  --color-ink-soft: #4a544a;
-  --color-ink-mute: #8a8f86;
-  --color-line: #d8d2c0;
-  --color-forest: #1f3a2e;
-  --color-terracotta: #c5552d;
-  --color-green-leaf: #6b8e5a;
-  --color-gold: #d4a056;
+  /* Surfaces — warm-neutral, near-white, no more cream */
+  --color-paper: #fafaf8;          /* page background */
+  --color-cream: #f3f2ee;          /* section surfaces */
+  --color-cream-2: #e8e6df;        /* hover/secondary surfaces */
+  --color-surface: #ffffff;        /* cards (true white) */
 
+  /* Ink — charcoal-green for premium feel */
+  --color-ink: #0f1612;            /* primary text + primary buttons */
+  --color-ink-soft: #3a423e;       /* body text */
+  --color-ink-mute: #7a8079;       /* captions, meta */
+  --color-line: #e5e3dd;           /* borders — subtler */
+
+  /* Brand accents — used sparingly */
+  --color-terracotta: #b8421c;     /* brand color: prices, hero gradient, brand badges (NOT buttons) */
+  --color-cta: #0f1612;            /* primary CTA background — same as ink, but semantic */
+  --color-forest: #1b3026;         /* deep green — sustainability headers */
+  --color-green-leaf: #4a6b52;     /* success state */
+  --color-gold: #b8862c;           /* warning / premium highlight */
+  --color-info: #4a6680;           /* info / links */
+
+  /* Type */
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Manrope", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
+  /* Radii */
   --radius-pill: 100px;
   --radius-card: 4px;
   --radius-card-lg: 12px;
   --radius-modal: 16px;
 
-  --shadow-sm: 0 1px 2px 0 rgba(26, 31, 26, 0.05);
-  --shadow: 0 1px 3px 0 rgba(26, 31, 26, 0.08), 0 1px 2px -1px rgba(26, 31, 26, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(26, 31, 26, 0.08), 0 2px 4px -2px rgba(26, 31, 26, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(26, 31, 26, 0.08), 0 4px 6px -4px rgba(26, 31, 26, 0.05);
+  /* Shadows — slightly cooler tint */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 22, 18, 0.05);
+  --shadow: 0 1px 3px 0 rgba(15, 22, 18, 0.08), 0 1px 2px -1px rgba(15, 22, 18, 0.04);
+  --shadow-md: 0 4px 8px -1px rgba(15, 22, 18, 0.08), 0 2px 4px -2px rgba(15, 22, 18, 0.04);
+  --shadow-lg: 0 12px 20px -3px rgba(15, 22, 18, 0.1), 0 4px 8px -4px rgba(15, 22, 18, 0.05);
 
+  /* Motion */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-default: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -115,8 +127,8 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* OfficeKit accent (industry theming) */
-  --ok-accent: var(--color-forest);
+  /* OfficeKit accent (industry theming) — defaults to charcoal ink */
+  --ok-accent: var(--color-cta);
 }
 
 .dark {
@@ -153,11 +165,11 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Industry accent overrides */
-[data-industry="it"]      { --ok-accent: #3a4a52; }
-[data-industry="finance"] { --ok-accent: #1f3a52; }
-[data-industry="sales"]   { --ok-accent: #c5552d; }
-[data-industry="law"]     { --ok-accent: #6b2a3a; }
+/* Industry accent overrides — used on hero strips per project industry, deeper hues than primary CTA */
+[data-industry="it"]      { --ok-accent: #2a3540; }   /* slate-blue */
+[data-industry="finance"] { --ok-accent: #1b3a4a; }   /* deep teal */
+[data-industry="sales"]   { --ok-accent: #8a3015; }   /* deep rust */
+[data-industry="law"]     { --ok-accent: #4a1f2c; }   /* burgundy */
 
 @layer base {
   * {

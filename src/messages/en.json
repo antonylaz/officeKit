@@ -39,6 +39,106 @@
       "createFailed": "Couldn't create project. Please check your input."
     }
   },
+  "sell": {
+    "landing": {
+      "eyebrow": "Sell office furniture",
+      "title": "Closing your office?",
+      "titleAccent": "Sell the furniture here.",
+      "subtitle": "Get paid for your existing furniture instead of dumping it. We match you with buyers who are looking for exactly what you have.",
+      "cta": "Create a listing",
+      "steps": {
+        "1": {
+          "title": "List what you have",
+          "desc": "Briefly describe the items — quantity, condition, and an optional asking price. Takes about 5 minutes."
+        },
+        "2": {
+          "title": "We match",
+          "desc": "We connect you with buyers requesting similar equipment, or buy directly for larger lots."
+        },
+        "3": {
+          "title": "You get paid",
+          "desc": "The buyer arranges pickup. Payment runs through OfficeKit before pickup happens — safe for both sides."
+        }
+      },
+      "why": {
+        "title": "Why sell with OfficeKit?",
+        "a": "Circular: your furniture gets a second life instead of landfill. You can document your CO₂ savings.",
+        "b": "Fast: we already have the buyer base — many new offices are looking for used furniture right now for budget and sustainability reasons.",
+        "c": "No upfront fees. We take a small matching fee only when a sale closes."
+      },
+      "faq": {
+        "1": {
+          "q": "What furniture can I sell?",
+          "a": "Anything from single chairs and tables to a full office's contents. We're especially interested in sit-stand desks, ergonomic chairs, meeting tables, storage units, and AV gear."
+        },
+        "2": {
+          "q": "How is pricing set?",
+          "a": "You can suggest an asking price (or leave it blank for us to estimate based on similar items in our catalog). Buyers may make offers — you always decide whether to accept."
+        },
+        "3": {
+          "q": "Does it cost anything?",
+          "a": "Listing is free. We take a 10% matching fee only after a sale completes. No fees if nothing sells."
+        }
+      }
+    },
+    "form": {
+      "eyebrow": "Create a listing",
+      "title": "Tell us what you're selling",
+      "subtitle": "We'll get back within 24 hours with an estimated valuation and next steps. No photos needed right now — we'll ask if there's interest.",
+      "sections": {
+        "company": "Company and contact",
+        "items": "What you're selling",
+        "itemsHint": "List each furniture type separately. Add as many rows as you need.",
+        "notes": "Anything else",
+        "notesHint": "Anything special we should know? Time-sensitive, pickup location, package deal, etc."
+      },
+      "fields": {
+        "companyName": "Company name",
+        "contactName": "Contact person",
+        "contactEmail": "Email",
+        "contactPhone": "Phone",
+        "city": "City",
+        "moveOutDate": "Move-out date",
+        "reason": "Reason",
+        "itemDescription": "What it is",
+        "quantity": "Quantity",
+        "condition": "Condition",
+        "askingPrice": "Asking price (SEK / unit)",
+        "notesPlaceholder": "e.g. We're moving Sept 15, furniture ready for pickup in Solna…"
+      },
+      "reason": {
+        "closing": "Closing office",
+        "downsizing": "Downsizing",
+        "moving": "Moving",
+        "refurbishing": "Refurbishing",
+        "other": "Other"
+      },
+      "condition": {
+        "like_new": "Like new",
+        "good": "Good",
+        "fair": "Fair",
+        "worn": "Worn"
+      },
+      "addItem": "Add another item",
+      "submit": "Submit listing",
+      "submitting": "Submitting",
+      "submitHint": "We'll respond within 24 hours.",
+      "errors": {
+        "submit": "Couldn't submit — please try again.",
+        "network": "Network error — please try again in a moment."
+      }
+    },
+    "thanks": {
+      "title": "Thanks — we've got your listing.",
+      "subtitle": "We've registered {itemCount} line items for {companyName}. A confirmation email is on its way.",
+      "nextStepsTitle": "What happens next?",
+      "step1": "One of us will read through the listing and respond within 24 hours with an estimated valuation.",
+      "step2": "If you approve, we publish the listing and match it against active buyer projects.",
+      "step3": "If a buyer is interested, we coordinate pickup and payment for you.",
+      "backHome": "Back to home",
+      "anotherListing": "List something else"
+    }
+  },
   "aiBuild": {
     "eyebrow": "Build your office with AI",
     "ctaLanding": "Build with AI",
@@ -86,7 +186,8 @@
       "cityPrefix": "Your office in"
     },
     "continueToFloorplan": "Continue to floor plan →",
-    "chooseModel": "Choose model"
+    "chooseModel": "Choose model",
+    "pageTitle": "Your checklist"
   },
   "variantPicker": {
     "title": "Choose variant",
@@ -101,7 +202,23 @@
   "floorplan": {
     "title": "Your floor plan",
     "subhead": "Drag items from the palette onto the canvas. Click to select and delete.",
-    "skip": "Skip floor plan"
+    "skip": "Skip floor plan",
+    "upload": {
+      "dropOrClick": "Drop or click to upload a floor plan",
+      "formats": "PNG, JPG, WebP, or PDF (max 8 MB)",
+      "uploaded": "Background image loaded",
+      "remove": "Remove",
+      "processing": "Processing…",
+      "opacity": "Opacity",
+      "errors": {
+        "tooLarge": "File is too large (max 8 MB)",
+        "invalidType": "Unsupported file type — use PNG, JPG, WebP, or PDF",
+        "pdfFailed": "Couldn't read the PDF — try an image file instead",
+        "uploadFailed": "Upload failed — please try again",
+        "removeFailed": "Couldn't remove — please try again",
+        "network": "Network error — please try again"
+      }
+    }
   },
   "request": {
     "title": "Request 3 quotes",
@@ -240,6 +357,8 @@
       "totalRequests": "total",
       "empty": "No RFQs match this filter.",
       "closesIn": "Closes in",
+      "itemsShort": "items",
+      "expiredLabel": "Expired",
       "filter_all": "All",
       "filter_sent": "New",
       "filter_viewed": "Viewed",

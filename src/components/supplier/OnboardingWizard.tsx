@@ -60,7 +60,7 @@ export function OnboardingWizard({ token, email, supplierName, totpSecret, qrDat
             <span style={{ fontSize: 12, color: "var(--color-ink-mute)" }}>{t("setPassword.hint")}</span>
           </label>
           <button onClick={() => setStep("totp")} disabled={password.length < 8}
-            style={{ marginTop: 24, background: "var(--color-terracotta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
+            style={{ marginTop: 24, background: "var(--color-cta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
             {t("setPassword.next")} →
           </button>
         </div>

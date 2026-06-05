@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Calendar, MapPin, Users, Trophy, Check, ArrowRight, Loader2, X, Plus, AlertCircle } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { formatSek } from "@/lib/money";
@@ -7,7 +9,10 @@ import { QuoteLineRow } from "./QuoteLineRow";
 import type { Rfq, Project, Company, Quote, QuoteLine, ItemCatalog, ProjectItem, ProductVariant } from "@prisma/client";
 
 type RfqWithEverything = Rfq & {
-  project: Project & { company: Company; items: (ProjectItem & { item: ItemCatalog; variant: ProductVariant | null })[] };
+  project: Project & {
+    company: Company;
+    items: (ProjectItem & { item: ItemCatalog; variant: ProductVariant | null })[];
+  };
   quote: (Quote & { lines: (QuoteLine & { item: ItemCatalog; variant: ProductVariant | null })[] }) | null;
 };
 
@@ -48,83 +53,304 @@ export function QuoteBuilder({ rfq, competitorCount }: { rfq: RfqWithEverything;
     await saveDraft();
     const res = await fetch(`/api/v1/supplier/rfqs/${rfq.id}/quote`, { method: "POST" });
     const data = await res.json();
-    if (!res.ok) { setError(data.error ?? "submit_failed"); setSubmitting(false); return; }
+    if (!res.ok) {
+      setError(data.error ?? "submit_failed");
+      setSubmitting(false);
+      return;
+    }
     router.push("/supplier/rfqs?status=quoted");
   }
 
+  const deadlineDate = new Date(rfq.deadlineAt);
+  const hoursLeft = Math.max(0, Math.round((deadlineDate.getTime() - Date.now()) / (1000 * 60 * 60)));
+  const deadlineUrgent = hoursLeft < 24;
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 420px", gap: 48, maxWidth: 1280 }}>
+    <div
+      className="max-w-[1280px] mx-auto px-8 py-12 grid gap-10"
+      style={{ gridTemplateColumns: "minmax(0, 1fr) 400px" }}
+    >
       <div>
-        <p style={{ color: "var(--color-ink-mute)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em" }}>{rfq.project.industry} · {competitorCount} {t("competitorsLabel")}</p>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 36, marginTop: 8 }}>{rfq.project.company.name}</h1>
-        <p style={{ color: "var(--color-ink-soft)", marginTop: 8 }}>
-          {rfq.project.city} · {rfq.project.headcount} {t("people")} · {t("deadline")} {new Date(rfq.deadlineAt).toLocaleString()}
-        </p>
-
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, marginTop: 40 }}>{t("builderTitle")}</h2>
-        <div style={{ marginTop: 16 }}>
-          {lines.map((l, idx) => (
-            <QuoteLineRow
-              key={l.id}
-              line={l}
-              disabled={submitted}
-              onChange={(patch) => setLines((arr) => arr.map((x, i) => i === idx ? { ...x, ...patch, lineTotal: (patch.unitPrice ?? x.unitPrice) * (patch.quantity ?? x.quantity) } : x))}
-              onRemove={() => setLines((arr) => arr.filter((_, i) => i !== idx))}
-            />
-          ))}
-        </div>
-
-        <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, marginTop: 32 }}>{t("notes")}</h3>
-        <textarea disabled={submitted} value={notes} onChange={(e) => setNotes(e.target.value)} rows={4}
-          style={{ marginTop: 8, width: "100%", background: "var(--color-cream)", border: "1px solid var(--color-line)", borderRadius: 4, padding: 12, fontFamily: "var(--font-body)", fontSize: 14 }} />
-
-        <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, marginTop: 32 }}>{t("perks")}</h3>
-        <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {perks.map((p, i) => (
-            <span key={i} style={{ padding: "6px 12px", background: "var(--color-cream-2)", borderRadius: 100, fontSize: 12 }}>
-              {p} {!submitted && <button onClick={() => setPerks(perks.filter((_, ix) => ix !== i))} style={{ marginLeft: 8, border: "none", background: "transparent", cursor: "pointer" }}>×</button>}
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mb-10"
+        >
+          <p
+            className="text-xs uppercase tracking-[0.14em] inline-flex items-center gap-2"
+            style={{ color: "var(--color-ink-mute)" }}
+          >
+            <span>{rfq.project.industry}</span>
+            <span>·</span>
+            <span className="inline-flex items-center gap-1">
+              <Trophy className="size-3.5" />
+              {competitorCount} {t("competitorsLabel")}
             </span>
-          ))}
-          {!submitted && (
-            <span style={{ display: "inline-flex", gap: 4 }}>
-              <input value={perkDraft} onChange={(e) => setPerkDraft(e.target.value)} placeholder={t("addPerk")}
-                style={{ background: "var(--color-cream)", border: "1px solid var(--color-line)", borderRadius: 4, padding: "4px 8px", fontSize: 12 }} />
-              <button onClick={() => { if (perkDraft) { setPerks([...perks, perkDraft]); setPerkDraft(""); } }}
-                style={{ background: "transparent", border: "1px solid var(--color-line)", borderRadius: 4, padding: "4px 10px", fontSize: 12, cursor: "pointer" }}>+</button>
+          </p>
+          <h1
+            className="mt-2 text-4xl tracking-tight"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+          >
+            {rfq.project.company.name}
+          </h1>
+          <div
+            className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[13px]"
+            style={{ color: "var(--color-ink-soft)" }}
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="size-3.5" />
+              {rfq.project.city}
             </span>
-          )}
-        </div>
+            <span className="inline-flex items-center gap-1.5">
+              <Users className="size-3.5" />
+              {rfq.project.headcount} {t("people")}
+            </span>
+            <span
+              className="inline-flex items-center gap-1.5"
+              style={{ color: deadlineUrgent ? "var(--color-terracotta)" : "var(--color-ink-soft)" }}
+            >
+              <Calendar className="size-3.5" />
+              {t("deadline")} {deadlineDate.toLocaleString()}
+              {deadlineUrgent && <span className="font-semibold">· {hoursLeft}h</span>}
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Lines */}
+        <section>
+          <h2
+            className="text-xl tracking-tight"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+          >
+            {t("builderTitle")}
+          </h2>
+          <div className="mt-4">
+            {lines.map((l, idx) => (
+              <QuoteLineRow
+                key={l.id}
+                line={l}
+                disabled={submitted}
+                onChange={(patch) =>
+                  setLines((arr) =>
+                    arr.map((x, i) =>
+                      i === idx
+                        ? {
+                            ...x,
+                            ...patch,
+                            lineTotal: (patch.unitPrice ?? x.unitPrice) * (patch.quantity ?? x.quantity),
+                          }
+                        : x,
+                    ),
+                  )
+                }
+                onRemove={() => setLines((arr) => arr.filter((_, i) => i !== idx))}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Notes */}
+        <section className="mt-10">
+          <h3
+            className="text-base font-semibold"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+          >
+            {t("notes")}
+          </h3>
+          <textarea
+            disabled={submitted}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={4}
+            placeholder="Lead time, delivery details, payment terms…"
+            className="mt-3 w-full rounded-xl border p-4 text-sm leading-relaxed outline-none focus:ring-2 transition-shadow"
+            style={{
+              background: "var(--color-paper)",
+              borderColor: "var(--color-line)",
+              fontFamily: "var(--font-body)",
+            }}
+          />
+        </section>
+
+        {/* Perks */}
+        <section className="mt-10">
+          <h3
+            className="text-base font-semibold"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+          >
+            {t("perks")}
+          </h3>
+          <div className="mt-3 flex flex-wrap gap-2 items-center">
+            {perks.map((p, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
+                style={{ background: "var(--color-cream-2)", color: "var(--color-ink)" }}
+              >
+                {p}
+                {!submitted && (
+                  <button
+                    onClick={() => setPerks(perks.filter((_, ix) => ix !== i))}
+                    className="hover:bg-white/40 rounded-full p-0.5 transition-colors"
+                    aria-label="remove perk"
+                  >
+                    <X className="size-3" />
+                  </button>
+                )}
+              </span>
+            ))}
+            {!submitted && (
+              <span className="inline-flex items-center gap-1">
+                <input
+                  value={perkDraft}
+                  onChange={(e) => setPerkDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && perkDraft) {
+                      e.preventDefault();
+                      setPerks([...perks, perkDraft]);
+                      setPerkDraft("");
+                    }
+                  }}
+                  placeholder={t("addPerk")}
+                  className="rounded-full border px-3 py-1.5 text-xs outline-none focus:ring-2 transition-shadow"
+                  style={{ background: "var(--color-paper)", borderColor: "var(--color-line)" }}
+                />
+                <button
+                  onClick={() => {
+                    if (perkDraft) {
+                      setPerks([...perks, perkDraft]);
+                      setPerkDraft("");
+                    }
+                  }}
+                  className="size-7 inline-flex items-center justify-center rounded-full border transition-colors hover:bg-accent/40"
+                  style={{ borderColor: "var(--color-line)" }}
+                  aria-label="add perk"
+                >
+                  <Plus className="size-3.5" style={{ color: "var(--color-ink-soft)" }} />
+                </button>
+              </span>
+            )}
+          </div>
+        </section>
       </div>
 
-      <aside style={{ background: "var(--color-paper)", border: "1px solid var(--color-line)", borderRadius: 4, padding: 32, height: "fit-content", position: "sticky", top: 32 }}>
-        <p style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-ink-mute)" }}>{t("totals")}</p>
-        <div style={{ marginTop: 16, display: "flex", justifyContent: "space-between" }}>
-          <span>{t("subtotal")}</span><span>{formatSek(subtotal)}</span>
-        </div>
-        <div style={{ marginTop: 8, display: "flex", justifyContent: "space-between", color: "var(--color-ink-mute)" }}>
-          <span>{t("vat")}</span><span>{formatSek(total - subtotal)}</span>
-        </div>
-        <hr style={{ border: 0, borderTop: "1px solid var(--color-line)", margin: "16px 0" }} />
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: 18 }}>{t("total")}</span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--color-terracotta)" }}>{formatSek(total)}</span>
-        </div>
-        {savedAt && !submitted && <p style={{ marginTop: 16, fontSize: 11, color: "var(--color-ink-mute)" }}>{t("savedAt")} {savedAt.toLocaleTimeString()}</p>}
-        {submitted && <p style={{ marginTop: 16, fontSize: 13, color: "var(--color-green-leaf)" }}>{t("submitted")}</p>}
-        {error && <p style={{ marginTop: 16, color: "var(--color-terracotta)" }}>{error}</p>}
-        {!submitted && (
-          <div style={{ display: "grid", gap: 8, marginTop: 24 }}>
-            <button onClick={saveDraft}
-              style={{ background: "transparent", color: "var(--color-ink)", padding: "12px 24px", border: "1px solid var(--color-line)", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
-              {t("saveDraft")}
-            </button>
-            <button onClick={submit} disabled={submitting || lines.length === 0}
-              style={{ background: "var(--color-terracotta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
-              {submitting ? "…" : t("submitQuote")} →
-            </button>
+      {/* Sticky totals sidebar */}
+      <aside className="sticky top-8 self-start">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="rounded-2xl border p-6 shadow-sm"
+          style={{ background: "var(--color-paper)", borderColor: "var(--color-line)" }}
+        >
+          <p
+            className="text-[11px] uppercase tracking-[0.12em] font-semibold"
+            style={{ color: "var(--color-ink-mute)" }}
+          >
+            {t("totals")}
+          </p>
+
+          <div className="mt-4 space-y-2">
+            <Row label={t("subtotal")} value={formatSek(subtotal)} />
+            <Row label={t("vat")} value={formatSek(total - subtotal)} muted />
           </div>
-        )}
+
+          <hr className="my-5" style={{ borderColor: "var(--color-line)" }} />
+
+          <div className="flex items-baseline justify-between">
+            <span className="text-base" style={{ fontFamily: "var(--font-display)" }}>
+              {t("total")}
+            </span>
+            <span
+              className="text-3xl tabular-nums"
+              style={{ fontFamily: "var(--font-display)", color: "var(--color-terracotta)" }}
+            >
+              {formatSek(total)}
+            </span>
+          </div>
+
+          {savedAt && !submitted && (
+            <p
+              className="mt-5 text-[11px] inline-flex items-center gap-1.5"
+              style={{ color: "var(--color-ink-mute)" }}
+            >
+              <Check className="size-3" />
+              {t("savedAt")} {savedAt.toLocaleTimeString()}
+            </p>
+          )}
+
+          {submitted && (
+            <p
+              className="mt-5 text-[13px] inline-flex items-center gap-1.5"
+              style={{ color: "var(--color-green-leaf)" }}
+            >
+              <Check className="size-3.5" />
+              {t("submitted")}
+            </p>
+          )}
+
+          {error && (
+            <p
+              className="mt-5 text-[13px] inline-flex items-start gap-1.5"
+              style={{ color: "var(--color-terracotta)" }}
+            >
+              <AlertCircle className="size-3.5 mt-0.5 shrink-0" />
+              {error}
+            </p>
+          )}
+
+          {!submitted && (
+            <div className="mt-6 grid gap-2">
+              <button
+                onClick={saveDraft}
+                className="px-6 py-3 rounded-lg border text-xs uppercase tracking-[0.1em] font-semibold transition-colors hover:bg-accent/40"
+                style={{ borderColor: "var(--color-line)", color: "var(--color-ink)" }}
+              >
+                {t("saveDraft")}
+              </button>
+              <button
+                onClick={submit}
+                disabled={submitting || lines.length === 0}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-white text-xs uppercase tracking-[0.1em] font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: "var(--color-cta)" }}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" />
+                    Submitting
+                  </>
+                ) : (
+                  <>
+                    {t("submitQuote")}
+                    <ArrowRight className="size-3.5" />
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </motion.div>
       </aside>
+    </div>
+  );
+}
+
+function Row({ label, value, muted = false }: { label: string; value: string; muted?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between">
+      <span
+        className="text-[13px]"
+        style={{ color: muted ? "var(--color-ink-mute)" : "var(--color-ink)" }}
+      >
+        {label}
+      </span>
+      <span
+        className="text-[14px] tabular-nums"
+        style={{ color: muted ? "var(--color-ink-mute)" : "var(--color-ink)" }}
+      >
+        {value}
+      </span>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { fraunces, manrope, jetbrains } from "@/lib/fonts";
 import { Header } from "@/components/shell/Header";
+import { HeaderUserSlot } from "@/components/shell/HeaderUserSlot";
 import { Footer } from "@/components/shell/Footer";
 import { Providers } from "@/app/providers";
 import "@/app/globals.css";
@@ -25,7 +26,7 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
-            <Header />
+            <Header userMenuSlot={<HeaderUserSlot />} />
             <main>{children}</main>
             <Footer />
           </Providers>

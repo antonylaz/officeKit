@@ -41,7 +41,7 @@ function InnerForm({ returnUrl }: { returnUrl: string }) {
       <PaymentElement options={{ layout: "tabs" }} />
       {error && <p style={{ color: "var(--color-terracotta)" }}>{error}</p>}
       <button type="submit" disabled={!stripe || submitting}
-        style={{ background: "var(--color-terracotta)", color: "white", padding: "14px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
+        style={{ background: "var(--color-cta)", color: "white", padding: "14px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
         {submitting ? "…" : "Pay"} →
       </button>
     </form>

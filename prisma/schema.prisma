@@ -193,6 +193,7 @@ model ItemCatalog {
   supplierPricing   SupplierPricing[]
   quoteLines        QuoteLine[]
   variants          ProductVariant[]
+  listingItems      ListingItem[]
   createdAt         DateTime     @default(now()) @map("created_at")
   updatedAt         DateTime     @updatedAt @map("updated_at")
 
@@ -226,6 +227,7 @@ model Project {
   moveInDate        DateTime?     @map("move_in_date") @db.Date
   status            ProjectStatus @default(draft)
   floorPlanData     Json?         @map("floor_plan_data")
+  floorPlanImageUrl String?       @map("floor_plan_image_url")
   company           Company       @relation(fields: [companyId], references: [id])
   createdByUser     User?         @relation(fields: [createdByUserId], references: [id])
   items             ProjectItem[]
@@ -386,4 +388,93 @@ model Order {
   updatedAt               DateTime      @updatedAt @map("updated_at")
 
   @@map("orders")
+}
+
+enum ListingStatus {
+  submitted
+  reviewing
+  approved
+  listed
+  sold
+  withdrawn
+}
+
+enum ListingReason {
+  closing
+  downsizing
+  moving
+  refurbishing
+  other
+}
+
+enum ItemCondition {
+  like_new
+  good
+  fair
+  worn
+}
+
+model Listing {
+  id              String          @id @default(uuid())
+  companyName     String          @map("company_name")
+  contactName     String          @map("contact_name")
+  contactEmail    String          @map("contact_email")
+  contactPhone    String?         @map("contact_phone")
+  city            String
+  moveOutDate     DateTime?       @map("move_out_date") @db.Date
+  reason          ListingReason   @default(other)
+  status          ListingStatus   @default(submitted)
+  notes           String?
+  items           ListingItem[]
+  photos          ListingPhoto[]
+  interests       ListingInterest[]
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@index([contactEmail])
+  @@map("listings")
+}
+
+model ListingPhoto {
+  id          String   @id @default(uuid())
+  listingId   String   @map("listing_id")
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url         String
+  caption     String?
+  displayOrder Int     @default(0) @map("display_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([listingId, displayOrder])
+  @@map("listing_photos")
+}
+
+model ListingInterest {
+  id            String   @id @default(uuid())
+  listingId     String   @map("listing_id")
+  listing       Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerEmail    String   @map("buyer_email")
+  buyerName     String   @map("buyer_name")
+  buyerCompany  String?  @map("buyer_company")
+  message       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([listingId, createdAt])
+  @@index([buyerEmail])
+  @@map("listing_interests")
+}
+
+model ListingItem {
+  id             String        @id @default(uuid())
+  listingId      String        @map("listing_id")
+  listing        Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  catalogItemId  String?       @map("catalog_item_id")
+  catalogItem    ItemCatalog?  @relation(fields: [catalogItemId], references: [id])
+  description    String
+  quantity       Int
+  condition      ItemCondition
+  askingPriceOre Int?          @map("asking_price_ore")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  @@map("listing_items")
 }

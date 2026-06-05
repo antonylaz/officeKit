@@ -30,7 +30,7 @@ export function TotpEnroll({ qrDataUrl, secret, value, onChange, onSubmit, submi
       </label>
       {error && <p style={{ color: "var(--color-terracotta)", marginTop: 12 }}>{error}</p>}
       <button onClick={onSubmit} disabled={submitting || value.length !== 6}
-        style={{ marginTop: 24, background: "var(--color-terracotta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
+        style={{ marginTop: 24, background: "var(--color-cta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
         {submitting ? "…" : t("verify")} →
       </button>
     </div>

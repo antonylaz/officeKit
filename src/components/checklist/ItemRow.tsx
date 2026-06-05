@@ -1,136 +1,144 @@
 "use client";
 import type { ItemCatalog, ProjectItem, ProductVariant } from "@prisma/client";
 import { formatSek } from "@/lib/money";
-import { useTranslations } from "next-intl";
+import { motion } from "framer-motion";
+import { Plus, Minus, ChevronRight } from "lucide-react";
 
-type LineWithVariant = (ProjectItem & { item: ItemCatalog; variant?: ProductVariant | null });
+type LineWithVariant = ProjectItem & { item: ItemCatalog; variant?: ProductVariant | null };
 
 export function ItemRow({
   item,
   line,
   onQuantity,
-  onMode,
-  onChooseModel,
+  onOpen,
 }: {
   item: ItemCatalog;
   line: LineWithVariant | undefined;
   onQuantity: (q: number) => void;
-  onMode: (m: "new" | "used") => void;
-  onChooseModel: () => void;
+  onOpen: () => void;
 }) {
-  const t = useTranslations("checklist");
   const qty = line?.quantity ?? 0;
   const mode = line?.mode ?? "new";
   const variant = line?.variant ?? null;
   const unitOre = variant
-    ? (mode === "new" ? variant.priceNewOre : (variant.priceUsedDefaultOre ?? variant.priceNewOre))
-    : (mode === "new" ? item.priceNewDefault : (item.priceUsedDefault ?? item.priceNewDefault));
-  const usedAvailable = variant
-    ? variant.priceUsedDefaultOre !== null
-    : item.priceUsedDefault !== null;
+    ? mode === "new"
+      ? variant.priceNewOre
+      : variant.priceUsedDefaultOre ?? variant.priceNewOre
+    : mode === "new"
+      ? item.priceNewDefault
+      : item.priceUsedDefault ?? item.priceNewDefault;
+
+  const isActive = qty > 0;
 
   return (
-    <div
+    <motion.div
+      layout
+      transition={{ duration: 0.15 }}
+      onClick={onOpen}
+      className="group flex items-center gap-4 p-4 mb-2 bg-white rounded-xl border cursor-pointer transition-all hover:shadow-md hover:border-foreground/20"
       style={{
-        display: "grid",
-        gridTemplateColumns: "64px 1fr 180px 160px 140px 100px",
-        gap: 20,
-        alignItems: "center",
-        padding: "20px 24px",
-        marginBottom: 12,
-        background: "white",
-        border: "1px solid var(--color-line)",
-        borderRadius: "var(--radius-card-lg)",
-        boxShadow: "var(--shadow-sm)",
-        transition: "box-shadow var(--transition-default), transform var(--transition-default)",
+        borderColor: isActive ? "var(--color-ink)" : "var(--color-line)",
       }}
     >
-      <div style={{ fontSize: 32 }} aria-hidden>{item.icon}</div>
-      <div>
-        <h4 style={{ margin: 0, fontWeight: 600, fontSize: 15 }}>{item.name}</h4>
-        <p style={{ margin: "4px 0 0", color: "var(--color-ink-mute)", fontSize: 13, lineHeight: 1.4 }}>{item.description}</p>
-        <div style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {item.tags.map((tg) => (
-            <span key={tg} style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-green-leaf)", fontWeight: 600 }}>{tg}</span>
-          ))}
+      <div
+        className="size-14 shrink-0 rounded-lg flex items-center justify-center text-2xl overflow-hidden"
+        style={{ background: variant ? "var(--color-paper)" : "var(--color-cream)" }}
+        aria-hidden
+      >
+        {variant ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={variant.imageUrl}
+            alt=""
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "/variants/_placeholder.svg";
+            }}
+          />
+        ) : (
+          <span>{item.icon}</span>
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2">
+          <h4 className="m-0 font-semibold text-[15px] leading-tight truncate">{item.name}</h4>
+          {variant && (
+            <span
+              className="text-[11px] font-medium px-1.5 py-0.5 rounded shrink-0"
+              style={{ background: "var(--color-cream-2)", color: "var(--color-ink-soft)" }}
+            >
+              {variant.manufacturer} {variant.sku ?? ""}
+            </span>
+          )}
+        </div>
+        <p
+          className="mt-0.5 text-[12.5px] leading-snug truncate"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          {item.description}
+        </p>
+      </div>
+
+      <div className="text-right shrink-0">
+        <div className="font-medium text-[14px] tabular-nums">{formatSek(unitOre)}</div>
+        <div className="text-[11px]" style={{ color: "var(--color-ink-mute)" }}>
+          {mode === "new" ? "new" : "used"} · per ea
         </div>
       </div>
 
-      <button
-        onClick={onChooseModel}
-        style={{
-          display: "flex", alignItems: "center", gap: 8,
-          padding: "8px 12px",
-          background: variant ? "var(--color-cream-2)" : "var(--color-cream)",
-          border: `1px solid var(--color-line)`,
-          borderRadius: 8,
-          cursor: "pointer",
-          fontSize: 12,
-          color: "var(--color-ink)",
-          textAlign: "left",
-          width: "100%",
-          transition: "background var(--transition-fast)",
-        }}
+      <div
+        className="shrink-0"
+        onClick={(e) => e.stopPropagation()}
       >
-        {variant ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={variant.imageUrl} alt="" width={32} height={32}
-              style={{ objectFit: "cover", borderRadius: 4, background: "var(--color-paper)" }}
-              onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/variants/_placeholder.svg"; }} />
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{variant.manufacturer} {variant.sku ?? ""}</span>
-          </>
-        ) : (
-          <span style={{ color: "var(--color-ink-mute)" }}>{t("chooseModel")}</span>
-        )}
-      </button>
-
-      <ModeToggle mode={mode} onChange={onMode} usedAvailable={usedAvailable} />
-      <Stepper value={qty} onChange={onQuantity} />
-      <div style={{ textAlign: "right", color: "var(--color-ink-mute)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
-        {formatSek(unitOre)} <span style={{ fontSize: 11 }}>/ ea</span>
+        <Stepper value={qty} onChange={onQuantity} />
       </div>
-    </div>
-  );
-}
 
-function ModeToggle({ mode, onChange, usedAvailable }: { mode: "new" | "used"; onChange: (m: "new" | "used") => void; usedAvailable: boolean }) {
-  return (
-    <div style={{ display: "inline-flex", padding: 2, background: "var(--color-cream)", borderRadius: 100, border: "1px solid var(--color-line)" }}>
-      {(["new", "used"] as const).map((m) => (
-        <button
-          key={m}
-          disabled={m === "used" && !usedAvailable}
-          onClick={() => onChange(m)}
-          style={{
-            padding: "6px 14px",
-            border: "none",
-            background: mode === m ? "var(--color-ink)" : "transparent",
-            color: mode === m ? "white" : "var(--color-ink-mute)",
-            borderRadius: 100,
-            fontSize: 11,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            fontWeight: 600,
-            cursor: m === "used" && !usedAvailable ? "not-allowed" : "pointer",
-            opacity: m === "used" && !usedAvailable ? 0.4 : 1,
-            transition: "background var(--transition-fast), color var(--transition-fast)",
-          }}
-        >
-          {m}
-        </button>
-      ))}
-    </div>
+      <ChevronRight
+        className="size-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ color: "var(--color-ink-mute)" }}
+      />
+    </motion.div>
   );
 }
 
 function Stepper({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  if (value === 0) {
+    return (
+      <button
+        onClick={() => onChange(1)}
+        className="size-9 inline-flex items-center justify-center rounded-full border transition-colors"
+        style={{
+          borderColor: "var(--color-line)",
+          background: "transparent",
+          color: "var(--color-ink-soft)",
+        }}
+        aria-label="add"
+      >
+        <Plus className="size-4" />
+      </button>
+    );
+  }
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: 12, border: "1px solid var(--color-line)", borderRadius: 100, padding: "4px 12px", background: "var(--color-cream)" }}>
-      <button onClick={() => onChange(Math.max(0, value - 1))} style={btn} aria-label="decrease">−</button>
-      <span style={{ minWidth: 24, textAlign: "center", fontWeight: 600 }}>{value}</span>
-      <button onClick={() => onChange(value + 1)} style={btn} aria-label="increase">+</button>
+    <div
+      className="inline-flex items-center gap-1 rounded-full border px-1"
+      style={{ borderColor: "var(--color-ink)", background: "white" }}
+    >
+      <button
+        onClick={() => onChange(Math.max(0, value - 1))}
+        aria-label="decrease"
+        className="size-7 inline-flex items-center justify-center rounded-full hover:bg-accent/40 transition-colors"
+      >
+        <Minus className="size-3.5" style={{ color: "var(--color-ink-soft)" }} />
+      </button>
+      <span className="min-w-6 text-center font-semibold tabular-nums text-[14px]">{value}</span>
+      <button
+        onClick={() => onChange(value + 1)}
+        aria-label="increase"
+        className="size-7 inline-flex items-center justify-center rounded-full hover:bg-accent/40 transition-colors"
+      >
+        <Plus className="size-3.5" style={{ color: "var(--color-ink-soft)" }} />
+      </button>
     </div>
   );
 }
-const btn: React.CSSProperties = { border: "none", background: "transparent", fontSize: 18, cursor: "pointer", width: 24, color: "var(--color-ink-soft)", lineHeight: 1, transition: "color var(--transition-fast)" };
