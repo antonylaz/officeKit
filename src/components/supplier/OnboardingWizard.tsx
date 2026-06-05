@@ -1,11 +1,21 @@
 "use client";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Lock, KeyRound, Check, ArrowRight, Building2 } from "lucide-react";
 import { TotpEnroll } from "./TotpEnroll";
 import { RecoveryCodesDisplay } from "./RecoveryCodesDisplay";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
-export function OnboardingWizard({ token, email, supplierName, totpSecret, qrDataUrl }: {
+type Step = "password" | "totp" | "recovery";
+
+export function OnboardingWizard({
+  token,
+  email,
+  supplierName,
+  totpSecret,
+  qrDataUrl,
+}: {
   token: string;
   email: string;
   supplierName: string;
@@ -14,7 +24,7 @@ export function OnboardingWizard({ token, email, supplierName, totpSecret, qrDat
 }) {
   const t = useTranslations("supplier.onboarding");
   const router = useRouter();
-  const [step, setStep] = useState<"password" | "totp" | "recovery">("password");
+  const [step, setStep] = useState<Step>("password");
   const [password, setPassword] = useState("");
   const [totpToken, setTotpToken] = useState("");
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
@@ -40,39 +50,196 @@ export function OnboardingWizard({ token, email, supplierName, totpSecret, qrDat
     setSubmitting(false);
   }
 
+  const titles: Record<Step, string> = {
+    password: t("setPassword.title"),
+    totp: t("enroll2fa.title"),
+    recovery: t("recovery.title"),
+  };
+
   return (
-    <div style={{ maxWidth: 560, margin: "0 auto", padding: "64px 32px" }}>
-      <p style={{ color: "var(--color-ink-mute)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em" }}>{supplierName}</p>
-      <h1 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginTop: 8 }}>
-        {step === "password" && t("setPassword.title")}
-        {step === "totp" && t("enroll2fa.title")}
-        {step === "recovery" && t("recovery.title")}
-      </h1>
-      <p style={{ color: "var(--color-ink-soft)", marginTop: 8 }}>{email}</p>
-
-      {step === "password" && (
-        <div style={{ marginTop: 32 }}>
-          <label style={{ display: "grid", gap: 6 }}>
-            <span style={{ fontSize: 13, color: "var(--color-ink-mute)" }}>{t("setPassword.password")}</span>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              minLength={8}
-              style={{ background: "var(--color-cream)", border: "1px solid var(--color-line)", borderRadius: 4, padding: "10px 12px" }} />
-            <span style={{ fontSize: 12, color: "var(--color-ink-mute)" }}>{t("setPassword.hint")}</span>
-          </label>
-          <button onClick={() => setStep("totp")} disabled={password.length < 8}
-            style={{ marginTop: 24, background: "var(--color-cta)", color: "white", padding: "12px 24px", border: "none", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 12, cursor: "pointer" }}>
-            {t("setPassword.next")} →
-          </button>
+    <div className="min-h-[calc(100vh-4rem)] flex items-start justify-center px-6 py-12">
+      <div className="w-full max-w-xl">
+        {/* Header */}
+        <div className="text-center">
+          <div
+            className="inline-flex size-12 items-center justify-center rounded-xl mb-5"
+            style={{ background: "rgba(15, 22, 18, 0.05)", color: "var(--color-ink)" }}
+          >
+            <Building2 className="size-5" />
+          </div>
+          <p
+            className="text-[11px] uppercase tracking-[0.14em] font-semibold"
+            style={{ color: "var(--color-ink-mute)" }}
+          >
+            {supplierName}
+          </p>
+          <h1
+            className="mt-3 text-3xl md:text-4xl tracking-tight"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+          >
+            {titles[step]}
+          </h1>
+          <p className="mt-2 text-[13px]" style={{ color: "var(--color-ink-mute)" }}>
+            {email}
+          </p>
         </div>
-      )}
 
-      {step === "totp" && (
-        <TotpEnroll qrDataUrl={qrDataUrl} secret={totpSecret} value={totpToken} onChange={setTotpToken} onSubmit={complete} submitting={submitting} error={error} />
-      )}
+        {/* Stepper */}
+        <Stepper current={step} />
 
-      {step === "recovery" && (
-        <RecoveryCodesDisplay codes={recoveryCodes} onContinue={() => router.push("/supplier/login")} />
-      )}
+        {/* Body */}
+        <div
+          className="mt-8 rounded-2xl border p-7 bg-white shadow-sm"
+          style={{ borderColor: "var(--color-line)" }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.2 }}
+            >
+              {step === "password" && (
+                <PasswordStep
+                  value={password}
+                  onChange={setPassword}
+                  onNext={() => setStep("totp")}
+                  hint={t("setPassword.hint")}
+                  passwordLabel={t("setPassword.password")}
+                  nextLabel={t("setPassword.next")}
+                />
+              )}
+
+              {step === "totp" && (
+                <TotpEnroll
+                  qrDataUrl={qrDataUrl}
+                  secret={totpSecret}
+                  value={totpToken}
+                  onChange={setTotpToken}
+                  onSubmit={complete}
+                  submitting={submitting}
+                  error={error}
+                />
+              )}
+
+              {step === "recovery" && (
+                <RecoveryCodesDisplay
+                  codes={recoveryCodes}
+                  onContinue={() => router.push("/supplier/login")}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
     </div>
+  );
+}
+
+function Stepper({ current }: { current: Step }) {
+  const steps: { id: Step; label: string }[] = [
+    { id: "password", label: "Password" },
+    { id: "totp", label: "2FA" },
+    { id: "recovery", label: "Recovery" },
+  ];
+  const currentIdx = steps.findIndex((s) => s.id === current);
+  return (
+    <ol className="mt-8 flex items-center justify-center gap-2">
+      {steps.map((s, idx) => {
+        const done = idx < currentIdx;
+        const active = idx === currentIdx;
+        return (
+          <li key={s.id} className="flex items-center gap-2">
+            <div
+              className="size-7 rounded-full inline-flex items-center justify-center text-[12px] font-semibold tabular-nums transition-colors"
+              style={{
+                background: done
+                  ? "var(--color-green-leaf)"
+                  : active
+                    ? "var(--color-ink)"
+                    : "var(--color-cream-2)",
+                color: done || active ? "white" : "var(--color-ink-mute)",
+              }}
+            >
+              {done ? <Check className="size-3.5" /> : idx + 1}
+            </div>
+            <span
+              className="text-[11px] uppercase tracking-[0.1em] font-semibold"
+              style={{ color: active ? "var(--color-ink)" : "var(--color-ink-mute)" }}
+            >
+              {s.label}
+            </span>
+            {idx < steps.length - 1 && (
+              <div
+                className="w-6 h-px"
+                style={{ background: idx < currentIdx ? "var(--color-green-leaf)" : "var(--color-line)" }}
+              />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function PasswordStep({
+  value,
+  onChange,
+  onNext,
+  hint,
+  passwordLabel,
+  nextLabel,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onNext: () => void;
+  hint: string;
+  passwordLabel: string;
+  nextLabel: string;
+}) {
+  const tooShort = value.length < 8;
+  return (
+    <>
+      <label className="block">
+        <span
+          className="text-[11px] uppercase tracking-[0.12em] font-semibold"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          {passwordLabel}
+        </span>
+        <div className="relative mt-1.5">
+          <Lock
+            className="absolute left-3 top-1/2 -translate-y-1/2 size-4 pointer-events-none"
+            style={{ color: "var(--color-ink-mute)" }}
+          />
+          <input
+            type="password"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            minLength={8}
+            autoComplete="new-password"
+            className="w-full rounded-lg border pl-10 pr-3 py-2.5 text-sm outline-none focus:ring-2 transition-shadow"
+            style={{ background: "var(--color-paper)", borderColor: "var(--color-line)" }}
+          />
+        </div>
+        <span
+          className="mt-2 inline-flex items-center gap-1.5 text-[12px]"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          <KeyRound className="size-3" />
+          {hint}
+        </span>
+      </label>
+      <button
+        onClick={onNext}
+        disabled={tooShort}
+        className="mt-6 w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg text-white text-xs uppercase tracking-[0.12em] font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ background: "var(--color-cta)" }}
+      >
+        {nextLabel}
+        <ArrowRight className="size-3.5" />
+      </button>
+    </>
   );
 }
