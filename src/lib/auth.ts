@@ -10,10 +10,46 @@ import { decryptSecret, verifyToken, verifyRecoveryCode } from "@/lib/totp";
 
 const resend = new ResendClient(process.env.RESEND_API_KEY!);
 
+// BankID via Criipto (Sweden). Env-gated — only enabled when all three are set.
+const criiptoEnabled =
+  Boolean(process.env.CRIIPTO_ISSUER && process.env.CRIIPTO_CLIENT_ID && process.env.CRIIPTO_CLIENT_SECRET);
+
+export const bankidEnabled = criiptoEnabled;
+
+const bankidProvider = criiptoEnabled
+  ? [
+      {
+        id: "bankid-se",
+        name: "BankID",
+        type: "oidc" as const,
+        issuer: process.env.CRIIPTO_ISSUER!,
+        clientId: process.env.CRIIPTO_CLIENT_ID!,
+        clientSecret: process.env.CRIIPTO_CLIENT_SECRET!,
+        // Criipto's Swedish BankID acr_values — see https://docs.criipto.com/verify/e-ids/swedish-bankid/
+        authorization: {
+          params: {
+            scope: "openid",
+            acr_values: "urn:grn:authn:se:bankid:another-device:qr",
+          },
+        },
+        // Map the BankID claims to NextAuth user shape
+        profile(profile: { sub: string; name?: string; email?: string }) {
+          return {
+            id: profile.sub,
+            name: profile.name ?? null,
+            email: profile.email ?? null,
+            role: "buyer",
+          };
+        },
+      },
+    ]
+  : [];
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   providers: [
+    ...bankidProvider,
     Resend({
       from: process.env.RESEND_FROM_EMAIL!,
       async sendVerificationRequest({ identifier: email, url }) {
