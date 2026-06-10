@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -15,10 +15,12 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:download-images": "tsx scripts/download-variant-images.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "deploy:check": "tsx scripts/deploy-check.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.97.1",

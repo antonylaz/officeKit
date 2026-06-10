@@ -9,6 +9,7 @@ export async function Sidebar() {
     { href: "/supplier", label: t("dashboard"), icon: "dashboard" },
     { href: "/supplier/rfqs", label: t("rfqs"), icon: "rfqs" },
     { href: "/supplier/orders", label: t("orders"), icon: "orders" },
+    { href: "/supplier/templates", label: t("templates"), icon: "templates" },
     { href: "/supplier/payouts", label: t("payouts"), icon: "payouts" },
     { href: "/supplier/settings", label: t("settings"), icon: "settings" },
   ];

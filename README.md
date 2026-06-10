@@ -1,6 +1,6 @@
 # OfficeKit
 
-Swedish responsive web marketplace for outfitting offices via vetted suppliers. Phases 0–7 implemented.
+Swedish responsive web marketplace for outfitting offices via vetted suppliers. Phases 0–21 implemented (buyer flow, AI office builder, resale marketplace, supplier portal with quote templates, BankID auth, admin console, buyer + seller email notifications).
 
 ## Quickstart (local dev)
 
@@ -43,19 +43,74 @@ pnpm tsx scripts/invite-supplier.ts --email rep@kinnarps-renew.se --supplier-id 
 pnpm tsx scripts/invite-supplier.ts --email admin@officekit.se --role admin --name "Admin"
 ```
 
-## Production deploy checklist
+## Production deploy (Vercel)
 
-1. **Hosting:** Vercel project pointed at GitHub repo
-2. **Database:** Supabase Postgres (or Neon). Connection URL → `DATABASE_URL`
-3. **Email:** Resend account, domain verified for `officekit.se`. `RESEND_API_KEY` + `RESEND_FROM_EMAIL`
-4. **Auth:** `AUTH_SECRET` (32-byte random), `AUTH_URL=https://officekit.se`
-5. **Payments:** Stripe account in live mode. Set `STRIPE_ENABLED=true`, `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`. Configure webhook endpoint at `https://officekit.se/api/webhooks/stripe` pointing at events: `payment_intent.succeeded`, `payment_intent.payment_failed`, `transfer.created`, `transfer.paid`. Set `STRIPE_WEBHOOK_SECRET` to the signing secret
-6. **Rate limiting:** Upstash Redis project. Set `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
-7. **Error tracking (optional):** Sentry project. Set `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`
-8. **Analytics (optional):** PostHog. Set `NEXT_PUBLIC_POSTHOG_KEY`
-9. **Build env:** `NEXT_PUBLIC_APP_URL=https://officekit.se`
-10. **Run migration on first deploy:** `pnpm prisma migrate deploy`
-11. **Seed catalog (one-time):** `pnpm db:seed`
+Three real prereqs and one nice-to-have. Everything else degrades gracefully if unset.
+
+### 0. Verify env before deploying
+
+```bash
+pnpm deploy:check
+```
+
+Exits non-zero if any **required** var is missing. Warns (but allows deploy) on **recommended**/**optional** vars — the corresponding feature just won't work.
+
+### 1. Provision
+
+| Service | Role | Free-tier OK? |
+|---|---|---|
+| **Vercel** | host | ✓ |
+| **Neon** or **Supabase** | Postgres | ✓ |
+| **Resend** | transactional email (magic links, listings, status updates, password resets) | ✓ at 100/day |
+| **Anthropic Console** | `/ai-build` route (Claude Opus 4.7) | pay-per-use |
+
+### 2. Required env (Vercel → Settings → Environment Variables → Production)
+
+```env
+DATABASE_URL=postgresql://...        # Neon / Supabase
+AUTH_SECRET=...                      # openssl rand -base64 32
+AUTH_URL=https://your-domain.com
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+```
+
+### 3. Recommended env (most features need these)
+
+```env
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL="OfficeKit <hello@your-domain.com>"   # Must be on a Resend-verified domain
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+### 4. Optional env (per-feature)
+
+| Feature | Vars |
+|---|---|
+| **Swedish BankID** | `CRIIPTO_ISSUER`, `CRIIPTO_CLIENT_ID`, `CRIIPTO_CLIENT_SECRET` — get from [criipto.com](https://dashboard.criipto.com); redirect URI is `{AUTH_URL}/api/auth/callback/bankid-se`. Without these the BankID button on `/sign-in` shows as disabled with helper text. |
+| **Stripe payments** | `STRIPE_ENABLED=true`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`. Webhook endpoint: `{AUTH_URL}/api/webhooks/stripe` for `payment_intent.succeeded`, `payment_intent.payment_failed`, `transfer.created`, `transfer.paid`. Without these, payments run in stub mode. |
+| **Rate limiting** | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`. Without these the rate limiter is process-local (fine on Vercel single-region, breaks at scale). |
+| **Error tracking** | `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT` |
+| **Analytics** | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` |
+
+### 5. Build + migrate
+
+The `vercel.json` already runs `prisma migrate deploy && next build`, so the database schema is migrated on every deploy. The first deploy will run all 8 migrations.
+
+### 6. Seed the catalog (first-time only)
+
+After the first successful deploy, seed catalog + suppliers locally pointed at production DB:
+
+```bash
+DATABASE_URL=<prod-url> pnpm db:seed
+DATABASE_URL=<prod-url> pnpm db:download-images   # downloads to public/variants — commit then redeploy
+```
+
+### 7. Invite the first admin
+
+```bash
+DATABASE_URL=<prod-url> pnpm tsx scripts/invite-supplier.ts --email you@your-domain.com --role admin --name "Admin"
+```
+
+Open the magic-link in your inbox to claim the admin account.
 
 ## Soft launch checklist (1 buyer + 3 suppliers)
 
