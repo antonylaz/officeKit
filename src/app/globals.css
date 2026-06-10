@@ -64,7 +64,7 @@
 
   /* Brand accents — used sparingly */
   --color-terracotta: #b8421c;     /* brand color: prices, hero gradient, brand badges (NOT buttons) */
-  --color-cta: #0f1612;            /* primary CTA background — same as ink, but semantic */
+  --color-cta: #1b3026;            /* primary CTA — forest green (was #0f1612 charcoal until phase 19) */
   --color-forest: #1b3026;         /* deep green — sustainability headers */
   --color-green-leaf: #4a6b52;     /* success state */
   --color-gold: #b8862c;           /* warning / premium highlight */

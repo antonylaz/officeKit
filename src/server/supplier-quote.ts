@@ -89,5 +89,11 @@ export async function submitQuote(rfqId: string, supplierId: string) {
     db.rfq.update({ where: { id: rfqId }, data: { status: "quoted", quotedAt: now } }),
   ]);
 
+  // Fire-and-forget buyer notification — never blocks quote submission
+  void (async () => {
+    const { notifyBuyerQuoteReceived } = await import("@/server/buyer-notifications");
+    await notifyBuyerQuoteReceived(rfqId);
+  })();
+
   return db.quote.findUnique({ where: { id: quote.id }, include: { lines: { include: { item: true } } } });
 }

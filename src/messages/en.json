@@ -329,6 +329,7 @@
       "recoveryCode": "Recovery code",
       "useRecovery": "Use a recovery code instead",
       "useTotp": "Use authenticator code",
+      "forgotPassword": "Forgot password?",
       "submit": "Sign in",
       "invalid": "Wrong email, password, or 2FA code."
     },
