@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, ArrowRight, AlertCircle, Lock, Mail, Shield } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 export function LoginForm({ defaultRedirect = "/supplier" }: { defaultRedirect?: string } = {}) {
@@ -71,14 +71,23 @@ export function LoginForm({ defaultRedirect = "/supplier" }: { defaultRedirect?:
         inputMode={useRecovery ? "text" : "numeric"}
         required
       />
-      <button
-        type="button"
-        onClick={() => setUseRecovery((x) => !x)}
-        className="text-[12px] underline hover:no-underline transition-all text-left"
-        style={{ color: "var(--color-ink-mute)" }}
-      >
-        {useRecovery ? t("useTotp") : t("useRecovery")}
-      </button>
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => setUseRecovery((x) => !x)}
+          className="text-[12px] underline hover:no-underline transition-all text-left"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          {useRecovery ? t("useTotp") : t("useRecovery")}
+        </button>
+        <Link
+          href="/forgot-password"
+          className="text-[12px] underline hover:no-underline transition-all"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          {t("forgotPassword")}
+        </Link>
+      </div>
 
       {error && (
         <motion.div

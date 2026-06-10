@@ -32,6 +32,12 @@ export async function transitionOrderStatus(orderId: string, supplierId: string,
     },
   });
 
+  // Fire-and-forget buyer status notification — never blocks the transition
+  void (async () => {
+    const { notifyBuyerOrderStatus } = await import("@/server/buyer-notifications");
+    await notifyBuyerOrderStatus(orderId, to);
+  })();
+
   // Fire payout transfer on delivery
   if (to === "delivered" && !order.stripeTransferId) {
     let transferId: string;

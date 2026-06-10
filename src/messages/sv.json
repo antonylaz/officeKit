@@ -329,6 +329,7 @@
       "recoveryCode": "Återställningskod",
       "useRecovery": "Använd återställningskod istället",
       "useTotp": "Använd autentiseringskod",
+      "forgotPassword": "Glömt lösenord?",
       "submit": "Logga in",
       "invalid": "Fel e-post, lösenord eller 2FA-kod."
     },
