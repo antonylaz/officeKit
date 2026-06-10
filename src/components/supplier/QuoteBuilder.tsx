@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { formatSek } from "@/lib/money";
 import { QuoteLineRow } from "./QuoteLineRow";
+import { QuoteTemplatesControl } from "./QuoteTemplatesControl";
 import type { Rfq, Project, Company, Quote, QuoteLine, ItemCatalog, ProjectItem, ProductVariant } from "@prisma/client";
 
 type RfqWithEverything = Rfq & {
@@ -126,6 +127,23 @@ export function QuoteBuilder({ rfq, competitorCount }: { rfq: RfqWithEverything;
           >
             {t("builderTitle")}
           </h2>
+          {!submitted && (
+            <div className="mt-4">
+              <QuoteTemplatesControl
+                rfqId={rfq.id}
+                currentLines={lines.map((l) => ({
+                  itemId: l.itemId,
+                  mode: l.mode,
+                  unitPrice: l.unitPrice,
+                  quantity: l.quantity,
+                }))}
+                currentNotes={notes}
+                currentPerks={perks}
+                onApplied={() => router.refresh()}
+                disabled={submitted}
+              />
+            </div>
+          )}
           <div className="mt-4">
             {lines.map((l, idx) => (
               <QuoteLineRow

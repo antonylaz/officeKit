@@ -6,6 +6,7 @@ import { fraunces, manrope, jetbrains } from "@/lib/fonts";
 import { Header } from "@/components/shell/Header";
 import { HeaderUserSlot } from "@/components/shell/HeaderUserSlot";
 import { Footer } from "@/components/shell/Footer";
+import { OnboardingTour } from "@/components/shell/OnboardingTour";
 import { Providers } from "@/app/providers";
 import "@/app/globals.css";
 
@@ -29,6 +30,7 @@ export default async function LocaleLayout({
             <Header userMenuSlot={<HeaderUserSlot />} />
             <main>{children}</main>
             <Footer />
+            <OnboardingTour />
           </Providers>
         </NextIntlClientProvider>
       </body>
