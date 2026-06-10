@@ -2,7 +2,7 @@
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useLocale } from "next-intl";
-import { LayoutDashboard, Inbox, ShoppingBag, Wallet, Settings } from "lucide-react";
+import { LayoutDashboard, Inbox, ShoppingBag, Wallet, Settings, BookOpen } from "lucide-react";
 import { Link } from "@/i18n/routing";
 
 interface Item {
@@ -15,6 +15,7 @@ const ICONS: Record<string, typeof LayoutDashboard> = {
   dashboard: LayoutDashboard,
   rfqs: Inbox,
   orders: ShoppingBag,
+  templates: BookOpen,
   payouts: Wallet,
   settings: Settings,
 };

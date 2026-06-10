@@ -17,6 +17,8 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     return NextResponse.json({ error: "invalid_request", details: parsed.error.flatten() }, { status: 400 });
   }
   try {
+    // Snapshot the previous status so we only email on actual changes
+    const prev = await db.listing.findUnique({ where: { id }, select: { status: true } });
     const listing = await db.listing.update({
       where: { id },
       data: {
@@ -24,6 +26,15 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
         ...(parsed.data.notes !== undefined && { notes: parsed.data.notes }),
       },
     });
+
+    // Fire-and-forget seller notification on status change
+    if (parsed.data.status !== undefined && prev?.status !== listing.status) {
+      void (async () => {
+        const { notifySellerListingStatus } = await import("@/server/seller-notifications");
+        await notifySellerListingStatus(listing.id, listing.status);
+      })();
+    }
+
     return NextResponse.json({ id: listing.id, status: listing.status });
   } catch {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
