@@ -37,6 +37,7 @@ interface MatchingListing {
   quantity: number;
   condition: ItemCondition;
   askingPriceOre: number | null;
+  photoUrl: string | null;
 }
 
 interface Props {
@@ -325,6 +326,7 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
                 <OffersSection
                   variant={selectedVariant}
                   item={item}
+                  mode={state.mode}
                   tradera={traderaByVariantId[selectedVariant.id] ?? null}
                 />
               )}
@@ -466,12 +468,22 @@ function MatchCard({ match, buyerCity }: { match: MatchingListing; buyerCity?: s
         aria-expanded={expanded}
         className="w-full text-left p-3 flex items-start gap-3 hover:bg-black/[0.02] transition-colors"
       >
-        <div
-          className="size-10 shrink-0 rounded-lg flex items-center justify-center"
-          style={{ background: "rgba(27, 48, 38, 0.1)" }}
-        >
-          <Leaf className="size-4" style={{ color: "var(--color-forest)" }} />
-        </div>
+        {match.photoUrl ? (
+          <div
+            className="size-12 shrink-0 rounded-lg overflow-hidden"
+            style={{ background: "var(--color-paper)" }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={match.photoUrl} alt="" className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div
+            className="size-10 shrink-0 rounded-lg flex items-center justify-center"
+            style={{ background: "rgba(27, 48, 38, 0.1)" }}
+          >
+            <Leaf className="size-4" style={{ color: "var(--color-forest)" }} />
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
             <p
@@ -699,26 +711,84 @@ function VariantOption({
 interface OffersSectionProps {
   variant: VariantWithPrices;
   item: ItemCatalog;
+  mode: "new" | "used";
   tradera: { total: number; items: TraderaItem[] } | null;
 }
 
-function OffersSection({ variant, item, tradera }: OffersSectionProps) {
+function OffersSection({ variant, item, mode, tradera }: OffersSectionProps) {
   const allOffers = buildVariantOffers(variant, item, variant.prices ?? []);
   const newOffers = allOffers.filter((o) => o.kind === "new");
   const usedOffers = allOffers.filter((o) => o.kind === "used");
-  const priced = newOffers.filter((o) => o.priceOre != null);
-  const searchOnly = newOffers.filter((o) => o.priceOre == null);
 
   return (
     <section>
-      <SectionLabel>Where to get it (new)</SectionLabel>
+      {mode === "new" ? (
+        <>
+          <NewOffersSection variant={variant} offers={newOffers} primary />
+          <UsedOffersSection variant={variant} offers={usedOffers} tradera={tradera} primary={false} />
+        </>
+      ) : (
+        <>
+          <UsedOffersSection variant={variant} offers={usedOffers} tradera={tradera} primary />
+          <NewOffersSection variant={variant} offers={newOffers} primary={false} />
+        </>
+      )}
+    </section>
+  );
+}
+
+function NewOffersSection({
+  variant,
+  offers,
+  primary,
+}: {
+  variant: VariantWithPrices;
+  offers: RetailerOffer[];
+  primary: boolean;
+}) {
+  const priced = offers.filter((o) => o.priceOre != null);
+  const searchOnly = offers.filter((o) => o.priceOre == null);
+
+  if (!primary) {
+    // Minor / collapsed presentation under the active section
+    return (
+      <details className="mt-6 group">
+        <summary
+          className="cursor-pointer list-none inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] font-semibold"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          <span className="group-open:rotate-90 transition-transform">▸</span>
+          Also available new · {offers.length} retailers
+          {priced.length > 0 && (
+            <span
+              className="ml-1 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-[0.06em] font-bold"
+              style={{ background: "var(--color-terracotta)", color: "white" }}
+            >
+              {priced.length} live
+            </span>
+          )}
+        </summary>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {priced.map((o) => (
+            <RetailerPill key={o.retailerId} offer={o} showPrice />
+          ))}
+          {searchOnly.map((o) => (
+            <RetailerPill key={o.retailerId} offer={o} />
+          ))}
+        </div>
+      </details>
+    );
+  }
+
+  return (
+    <div>
+      <SectionLabel>Where to buy new</SectionLabel>
       <p className="mt-1 text-[12px]" style={{ color: "var(--color-ink-mute)" }}>
         {priced.length > 0
-          ? `${priced.length} live offer${priced.length === 1 ? "" : "s"} · ${searchOnly.length} more search-only`
-          : `Search ${newOffers.length} Swedish retailers — connect a feed to unlock live prices`}
+          ? `${priced.length} live offer${priced.length === 1 ? "" : "s"} · ${searchOnly.length} more retailers`
+          : `Search ${offers.length} Swedish retailers — connect a feed to unlock live prices`}
       </p>
 
-      {/* Priced offers — cheapest first */}
       {priced.length > 0 && (
         <div className="mt-3 space-y-2">
           {priced.map((o, idx) => (
@@ -727,7 +797,6 @@ function OffersSection({ variant, item, tradera }: OffersSectionProps) {
         </div>
       )}
 
-      {/* Search-only offers — pill grid */}
       {searchOnly.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {searchOnly.map((o) => (
@@ -746,40 +815,86 @@ function OffersSection({ variant, item, tradera }: OffersSectionProps) {
           )}
         </div>
       )}
+    </div>
+  );
+}
 
-      {/* Used — Tradera live items + Tradera/Blocket search pills */}
-      <div className="mt-7">
-        <SectionLabel>
-          <span className="inline-flex items-center gap-1.5">
-            <Leaf className="size-3" style={{ color: "var(--color-forest)" }} />
-            Second-hand
-          </span>
-        </SectionLabel>
-        {tradera && tradera.items.length > 0 && (
-          <div className="mt-3 space-y-2">
-            {tradera.items.map((it) => (
-              <TraderaItemCard key={it.id} item={it} />
-            ))}
-            {tradera.total > tradera.items.length && (
-              <a
-                href={`https://www.tradera.com/search?q=${encodeURIComponent(variant.traderaSearchQuery ?? variant.name)}`}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="block text-[11px] uppercase tracking-[0.08em] font-semibold hover:underline pt-1"
-                style={{ color: "var(--color-forest)" }}
-              >
-                See all {tradera.total} on Tradera →
-              </a>
-            )}
-          </div>
-        )}
+function UsedOffersSection({
+  variant,
+  offers,
+  tradera,
+  primary,
+}: {
+  variant: VariantWithPrices;
+  offers: RetailerOffer[];
+  tradera: { total: number; items: TraderaItem[] } | null;
+  primary: boolean;
+}) {
+  if (!primary) {
+    return (
+      <details className="mt-6 group">
+        <summary
+          className="cursor-pointer list-none inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] font-semibold"
+          style={{ color: "var(--color-ink-mute)" }}
+        >
+          <span className="group-open:rotate-90 transition-transform">▸</span>
+          <Leaf className="size-3" style={{ color: "var(--color-forest)" }} />
+          Also available second-hand · {offers.length} marketplaces
+          {tradera && tradera.total > 0 && (
+            <span
+              className="ml-1 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-[0.06em] font-bold"
+              style={{ background: "var(--color-forest)", color: "white" }}
+            >
+              {tradera.total} on Tradera
+            </span>
+          )}
+        </summary>
         <div className="mt-3 flex flex-wrap gap-2">
-          {usedOffers.map((o) => (
+          {offers.map((o) => (
             <RetailerPill key={o.retailerId} offer={o} />
           ))}
         </div>
+      </details>
+    );
+  }
+
+  return (
+    <div>
+      <SectionLabel>
+        <span className="inline-flex items-center gap-1.5">
+          <Leaf className="size-3" style={{ color: "var(--color-forest)" }} />
+          Buy second-hand
+        </span>
+      </SectionLabel>
+      <p className="mt-1 text-[12px]" style={{ color: "var(--color-ink-mute)" }}>
+        {tradera && tradera.total > 0
+          ? `${tradera.total} live listing${tradera.total === 1 ? "" : "s"} on Tradera right now`
+          : `Search ${offers.length} second-hand marketplaces`}
+      </p>
+      {tradera && tradera.items.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {tradera.items.map((it) => (
+            <TraderaItemCard key={it.id} item={it} />
+          ))}
+          {tradera.total > tradera.items.length && (
+            <a
+              href={`https://www.tradera.com/search?q=${encodeURIComponent(variant.traderaSearchQuery ?? variant.name)}`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="block text-[11px] uppercase tracking-[0.08em] font-semibold hover:underline pt-1"
+              style={{ color: "var(--color-forest)" }}
+            >
+              See all {tradera.total} on Tradera →
+            </a>
+          )}
+        </div>
+      )}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {offers.map((o) => (
+          <RetailerPill key={o.retailerId} offer={o} />
+        ))}
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -828,7 +943,7 @@ function PricedOfferCard({ offer, highlightCheapest }: { offer: RetailerOffer; h
   );
 }
 
-function RetailerPill({ offer }: { offer: RetailerOffer }) {
+function RetailerPill({ offer, showPrice = false }: { offer: RetailerOffer; showPrice?: boolean }) {
   return (
     <a
       href={offer.url}
@@ -843,6 +958,11 @@ function RetailerPill({ offer }: { offer: RetailerOffer }) {
         aria-hidden
       />
       {offer.retailerName}
+      {showPrice && offer.priceOre != null && (
+        <span className="font-semibold tabular-nums" style={{ color: "var(--color-terracotta)" }}>
+          {formatSek(offer.priceOre)}
+        </span>
+      )}
       <ExternalLink className="size-2.5 opacity-60" />
     </a>
   );

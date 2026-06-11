@@ -11,6 +11,8 @@ export interface MatchingListing {
   quantity: number;
   condition: ItemCondition;
   askingPriceOre: number | null;
+  /** First photo from the listing, if the seller uploaded any */
+  photoUrl: string | null;
 }
 
 /**
@@ -83,7 +85,21 @@ export async function findMatchingListings(
       catalogItemId,
       listing: { status: { in: ["approved", "listed"] } },
     },
-    include: { listing: { select: { id: true, city: true, reason: true, moveOutDate: true } } },
+    include: {
+      listing: {
+        select: {
+          id: true,
+          city: true,
+          reason: true,
+          moveOutDate: true,
+          photos: {
+            select: { url: true },
+            orderBy: { displayOrder: "asc" },
+            take: 1,
+          },
+        },
+      },
+    },
     take: 8,
   });
 
@@ -103,7 +119,21 @@ export async function findMatchingListings(
             { listing: { status: { in: ["approved", "listed"] } } },
           ],
         },
-        include: { listing: { select: { id: true, city: true, reason: true, moveOutDate: true } } },
+        include: {
+      listing: {
+        select: {
+          id: true,
+          city: true,
+          reason: true,
+          moveOutDate: true,
+          photos: {
+            select: { url: true },
+            orderBy: { displayOrder: "asc" },
+            take: 1,
+          },
+        },
+      },
+    },
         take: 8,
       });
 
@@ -124,6 +154,7 @@ export async function findMatchingListings(
     quantity: r.quantity,
     condition: r.condition,
     askingPriceOre: r.askingPriceOre,
+    photoUrl: r.listing.photos[0]?.url ?? null,
   }));
 
   // Sort: buyer's city first, then by quantity (more units = better match)
