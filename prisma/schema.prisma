@@ -409,11 +409,37 @@ model ProductVariant {
   lastSyncedAt          DateTime? @map("last_synced_at")
   projectItems          ProjectItem[]
   quoteLines            QuoteLine[]
+  prices                VariantPrice[]
   createdAt             DateTime @default(now()) @map("created_at")
   updatedAt             DateTime @updatedAt @map("updated_at")
 
   @@index([itemId, displayOrder])
   @@map("product_variants")
+}
+
+/// Per-retailer live price for a variant. Populated by the affiliate-sync engine
+/// when a publisher feed is connected; queried by the UI to render priced offers
+/// (sorted cheapest-first) alongside the deep-search fallback.
+model VariantPrice {
+  id            String        @id @default(uuid())
+  variantId     String        @map("variant_id")
+  variant       ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  /// Matches RetailerId in src/lib/retailers.ts ("inet", "dustin", "ikea", ...)
+  retailerId    String        @map("retailer_id")
+  priceOre      Int           @map("price_ore")
+  /// in_stock | out_of_stock | preorder | unknown
+  stockStatus   String?       @map("stock_status")
+  /// Affiliate-tagged deep link to the retailer's product page
+  affiliateUrl  String        @map("affiliate_url")
+  /// Which feed produced this row — for debugging / per-feed deletion
+  sourceFeed    String        @map("source_feed")
+  lastSeenAt    DateTime      @default(now()) @map("last_seen_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@unique([variantId, retailerId])
+  @@index([variantId, priceOre])
+  @@map("variant_prices")
 }
 
 model Order {

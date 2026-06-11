@@ -52,6 +52,13 @@ const feedSchema = z.object({
 export interface SyncOptions {
   /** Identifier for the feed: "tradedoubler_dustin", "awin_komplett", etc. */
   feedSource: string;
+  /**
+   * Which retailer this feed advertises. Matches a RetailerId from
+   * src/lib/retailers.ts (e.g. "dustin", "komplett", "inet"). If omitted,
+   * the engine derives it from `feedSource` by taking the segment after the
+   * first underscore — so "tradedoubler_dustin" → "dustin".
+   */
+  retailerId?: string;
   /** Either an absolute URL or a local file path (used for dev / tests) */
   source: { type: "url"; url: string } | { type: "file"; path: string };
 }
@@ -101,6 +108,11 @@ export async function syncAffiliateFeed(opts: SyncOptions): Promise<SyncResult> 
     // Derive a deterministic variant id from the feed (so re-runs upsert)
     const variantId = `${opts.feedSource}-${p.productId}`;
     const priceNewOre = Math.round(p.price * 100);
+    const retailerId =
+      opts.retailerId ??
+      // tradedoubler_dustin → dustin · tradedoubler_dustin_mock → dustin
+      opts.feedSource.split("_")[1] ??
+      opts.feedSource;
 
     try {
       await db.productVariant.upsert({
@@ -137,6 +149,28 @@ export async function syncAffiliateFeed(opts: SyncOptions): Promise<SyncResult> 
           active: true,
         },
       });
+
+      // Engine bit: also write a per-(variant, retailer) price row so the UI
+      // can show multiple retailers per variant once more feeds are connected.
+      await db.variantPrice.upsert({
+        where: { variantId_retailerId: { variantId, retailerId } },
+        create: {
+          variantId,
+          retailerId,
+          priceOre: priceNewOre,
+          stockStatus: normalizeStock(p.stockStatus),
+          affiliateUrl: p.productUrl,
+          sourceFeed: opts.feedSource,
+        },
+        update: {
+          priceOre: priceNewOre,
+          stockStatus: normalizeStock(p.stockStatus),
+          affiliateUrl: p.productUrl,
+          sourceFeed: opts.feedSource,
+          lastSeenAt: new Date(),
+        },
+      });
+
       upserted++;
     } catch (e) {
       errors.push(`upsert failed for ${variantId}: ${(e as Error).message}`);

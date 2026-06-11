@@ -2,11 +2,16 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { X, Check, Plus, Minus, ExternalLink, Loader2, Leaf, MapPin, ShoppingBag, Gavel } from "lucide-react";
+import { X, Check, Plus, Minus, ExternalLink, Loader2, Leaf, MapPin, Gavel } from "lucide-react";
 import { ExpressInterestButton } from "@/components/listing/ExpressInterestButton";
 import { formatSek } from "@/lib/money";
 import { CatalogIcon } from "@/lib/catalog-icon";
+import { buildVariantOffers, type RetailerOffer } from "@/lib/retailers";
 import type { ItemCatalog, ProductVariant, ItemCondition } from "@prisma/client";
+
+type VariantWithPrices = ProductVariant & {
+  prices?: Array<{ retailerId: string; priceOre: number; stockStatus: string | null; affiliateUrl: string }>;
+};
 
 interface TraderaItem {
   id: string;
@@ -45,7 +50,7 @@ interface Props {
 export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: Props) {
   const t = useTranslations();
   // Keyed by itemId so we don't have to setState synchronously to clear
-  const [variantsByItemId, setVariantsByItemId] = useState<Record<string, ProductVariant[]>>({});
+  const [variantsByItemId, setVariantsByItemId] = useState<Record<string, VariantWithPrices[]>>({});
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const [matchingByItemId, setMatchingByItemId] = useState<Record<string, MatchingListing[]>>({});
   const variants = item ? variantsByItemId[item.id] ?? [] : [];
@@ -319,6 +324,7 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
               {selectedVariant && (
                 <OffersSection
                   variant={selectedVariant}
+                  item={item}
                   tradera={traderaByVariantId[selectedVariant.id] ?? null}
                 />
               )}
@@ -655,160 +661,205 @@ function VariantOption({
 }
 
 interface OffersSectionProps {
-  variant: ProductVariant;
+  variant: VariantWithPrices;
+  item: ItemCatalog;
   tradera: { total: number; items: TraderaItem[] } | null;
 }
 
-function OffersSection({ variant, tradera }: OffersSectionProps) {
-  const traderaSearchUrl = `https://www.tradera.com/search?q=${encodeURIComponent(
-    variant.traderaSearchQuery ?? variant.name,
-  )}`;
-  const blocketSearchUrl = variant.blocketSearchQuery
-    ? `https://www.blocket.se/annonser/hela_sverige?q=${encodeURIComponent(variant.blocketSearchQuery)}`
-    : null;
-  const retailerName = retailerLabelFromFeedSource(variant.feedSource);
-  const stockStatus = variant.stockStatus ?? "unknown";
+function OffersSection({ variant, item, tradera }: OffersSectionProps) {
+  const allOffers = buildVariantOffers(variant, item, variant.prices ?? []);
+  const newOffers = allOffers.filter((o) => o.kind === "new");
+  const usedOffers = allOffers.filter((o) => o.kind === "used");
+  const priced = newOffers.filter((o) => o.priceOre != null);
+  const searchOnly = newOffers.filter((o) => o.priceOre == null);
 
   return (
     <section>
-      <SectionLabel>Where to get it</SectionLabel>
+      <SectionLabel>Where to get it (new)</SectionLabel>
+      <p className="mt-1 text-[12px]" style={{ color: "var(--color-ink-mute)" }}>
+        {priced.length > 0
+          ? `${priced.length} live offer${priced.length === 1 ? "" : "s"} · ${searchOnly.length} more search-only`
+          : `Search ${newOffers.length} Swedish retailers — connect a feed to unlock live prices`}
+      </p>
 
-      {/* New — affiliate offer */}
-      {variant.affiliateUrl && (
-        <a
-          href={variant.affiliateUrl}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="mt-3 flex items-center gap-3 p-3 rounded-xl border hover:shadow-sm transition-shadow"
-          style={{ borderColor: "var(--color-line)", background: "white" }}
-        >
-          <div
-            className="size-10 shrink-0 rounded-lg flex items-center justify-center"
-            style={{ background: "rgba(184, 66, 28, 0.1)" }}
-          >
-            <ShoppingBag className="size-4" style={{ color: "var(--color-terracotta)" }} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[10px] uppercase tracking-[0.1em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
-              Buy new at {retailerName}
-            </div>
-            <div className="mt-0.5 text-[14px] font-medium truncate" style={{ color: "var(--color-ink)" }}>
-              {variant.name}
-            </div>
-            <StockBadge status={stockStatus} />
-          </div>
-          <div className="text-right shrink-0">
-            <div className="text-[14px] font-semibold tabular-nums" style={{ color: "var(--color-terracotta)" }}>
-              {formatSek(variant.priceNewOre)}
-            </div>
-            <div className="mt-0.5 inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
-              Go to store <ExternalLink className="size-2.5" />
-            </div>
-          </div>
-        </a>
+      {/* Priced offers — cheapest first */}
+      {priced.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {priced.map((o, idx) => (
+            <PricedOfferCard key={o.retailerId} offer={o} highlightCheapest={idx === 0} />
+          ))}
+        </div>
       )}
 
-      {/* Used — real Tradera listings */}
-      {tradera && tradera.items.length > 0 && (
-        <div className="mt-3 space-y-2">
-          {tradera.items.map((it) => (
-            <a
-              key={it.id}
-              href={it.url}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="flex items-center gap-3 p-3 rounded-xl border hover:shadow-sm transition-shadow"
-              style={{ borderColor: "var(--color-line)", background: "white" }}
-            >
-              <div
-                className="size-10 shrink-0 rounded-lg overflow-hidden flex items-center justify-center"
-                style={{ background: "var(--color-paper)" }}
-              >
-                {it.thumbnailUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={it.thumbnailUrl} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <Gavel className="size-4" style={{ color: "var(--color-ink-mute)" }} />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[10px] uppercase tracking-[0.1em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
-                  Used · Tradera
-                </div>
-                <div className="mt-0.5 text-[13px] font-medium truncate" style={{ color: "var(--color-ink)" }}>
-                  {it.title}
-                </div>
-                {it.bidCount != null && it.bidCount > 0 && (
-                  <div className="mt-0.5 text-[11px]" style={{ color: "var(--color-ink-mute)" }}>
-                    {it.bidCount} bid{it.bidCount === 1 ? "" : "s"}
-                  </div>
-                )}
-              </div>
-              <div className="text-right shrink-0">
-                {it.priceSek != null ? (
-                  <div className="text-[14px] font-semibold tabular-nums" style={{ color: "var(--color-ink)" }}>
-                    {it.priceSek.toLocaleString("sv-SE")} kr
-                  </div>
-                ) : (
-                  <div className="text-[12px] italic" style={{ color: "var(--color-ink-mute)" }}>
-                    Make offer
-                  </div>
-                )}
-                <div className="mt-0.5 inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
-                  View <ExternalLink className="size-2.5" />
-                </div>
-              </div>
-            </a>
+      {/* Search-only offers — pill grid */}
+      {searchOnly.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {searchOnly.map((o) => (
+            <RetailerPill key={o.retailerId} offer={o} />
           ))}
-          {tradera.total > tradera.items.length && (
+          {variant.manufacturerUrl && (
             <a
-              href={traderaSearchUrl}
+              href={variant.manufacturerUrl}
               target="_blank"
               rel="noreferrer noopener"
-              className="block text-[11px] uppercase tracking-[0.08em] font-semibold hover:underline pt-1"
-              style={{ color: "var(--color-forest)" }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] hover:bg-accent/30 transition-colors"
+              style={{ borderColor: "var(--color-line)", color: "var(--color-ink-soft)" }}
             >
-              See all {tradera.total} on Tradera →
+              {variant.manufacturer} (manufacturer) <ExternalLink className="size-2.5" />
             </a>
           )}
         </div>
       )}
 
-      {/* Fallback search row — always show so the user has somewhere to go */}
-      <div className="mt-3 flex flex-wrap gap-2">
-        <a
-          href={traderaSearchUrl}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] hover:bg-accent/30 transition-colors"
-          style={{ borderColor: "var(--color-line)", color: "var(--color-ink-soft)" }}
-        >
-          Search Tradera <ExternalLink className="size-2.5" />
-        </a>
-        {blocketSearchUrl && (
-          <a
-            href={blocketSearchUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] hover:bg-accent/30 transition-colors"
-            style={{ borderColor: "var(--color-line)", color: "var(--color-ink-soft)" }}
-          >
-            Search Blocket <ExternalLink className="size-2.5" />
-          </a>
+      {/* Used — Tradera live items + Tradera/Blocket search pills */}
+      <div className="mt-7">
+        <SectionLabel>
+          <span className="inline-flex items-center gap-1.5">
+            <Leaf className="size-3" style={{ color: "var(--color-forest)" }} />
+            Second-hand
+          </span>
+        </SectionLabel>
+        {tradera && tradera.items.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {tradera.items.map((it) => (
+              <TraderaItemCard key={it.id} item={it} />
+            ))}
+            {tradera.total > tradera.items.length && (
+              <a
+                href={`https://www.tradera.com/search?q=${encodeURIComponent(variant.traderaSearchQuery ?? variant.name)}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="block text-[11px] uppercase tracking-[0.08em] font-semibold hover:underline pt-1"
+                style={{ color: "var(--color-forest)" }}
+              >
+                See all {tradera.total} on Tradera →
+              </a>
+            )}
+          </div>
         )}
-        {variant.manufacturerUrl && (
-          <a
-            href={variant.manufacturerUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] hover:bg-accent/30 transition-colors"
-            style={{ borderColor: "var(--color-line)", color: "var(--color-ink-soft)" }}
-          >
-            Manufacturer site <ExternalLink className="size-2.5" />
-          </a>
-        )}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {usedOffers.map((o) => (
+            <RetailerPill key={o.retailerId} offer={o} />
+          ))}
+        </div>
       </div>
     </section>
+  );
+}
+
+function PricedOfferCard({ offer, highlightCheapest }: { offer: RetailerOffer; highlightCheapest: boolean }) {
+  return (
+    <a
+      href={offer.url}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="flex items-center gap-3 p-3 rounded-xl border hover:shadow-sm transition-shadow"
+      style={{
+        borderColor: highlightCheapest ? "var(--color-terracotta)" : "var(--color-line)",
+        background: "white",
+        boxShadow: highlightCheapest ? "0 0 0 1px var(--color-terracotta) inset" : undefined,
+      }}
+    >
+      <div
+        className="size-10 shrink-0 rounded-lg flex items-center justify-center font-bold text-[11px] tracking-wide"
+        style={{ background: offer.accent ?? "var(--color-ink)", color: "white" }}
+      >
+        {offer.retailerName.slice(0, 3).toUpperCase()}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[14px] font-semibold leading-tight" style={{ color: "var(--color-ink)" }}>
+          {offer.retailerName}
+          {highlightCheapest && (
+            <span
+              className="ml-2 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-[0.06em] font-bold"
+              style={{ background: "var(--color-terracotta)", color: "white" }}
+            >
+              Cheapest
+            </span>
+          )}
+        </div>
+        <StockBadge status={offer.stockStatus ?? "unknown"} />
+      </div>
+      <div className="text-right shrink-0">
+        <div className="text-[14px] font-semibold tabular-nums" style={{ color: "var(--color-terracotta)" }}>
+          {formatSek(offer.priceOre!)}
+        </div>
+        <div className="mt-0.5 inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
+          Buy <ExternalLink className="size-2.5" />
+        </div>
+      </div>
+    </a>
+  );
+}
+
+function RetailerPill({ offer }: { offer: RetailerOffer }) {
+  return (
+    <a
+      href={offer.url}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] hover:bg-accent/30 transition-colors"
+      style={{ borderColor: "var(--color-line)", color: "var(--color-ink-soft)" }}
+    >
+      <span
+        className="inline-block size-2 rounded-full"
+        style={{ background: offer.accent ?? "var(--color-ink-mute)" }}
+        aria-hidden
+      />
+      {offer.retailerName}
+      <ExternalLink className="size-2.5 opacity-60" />
+    </a>
+  );
+}
+
+function TraderaItemCard({ item: it }: { item: TraderaItem }) {
+  return (
+    <a
+      href={it.url}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="flex items-center gap-3 p-3 rounded-xl border hover:shadow-sm transition-shadow"
+      style={{ borderColor: "var(--color-line)", background: "white" }}
+    >
+      <div
+        className="size-10 shrink-0 rounded-lg overflow-hidden flex items-center justify-center"
+        style={{ background: "var(--color-paper)" }}
+      >
+        {it.thumbnailUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={it.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <Gavel className="size-4" style={{ color: "var(--color-ink-mute)" }} />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[10px] uppercase tracking-[0.1em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
+          Used · Tradera
+        </div>
+        <div className="mt-0.5 text-[13px] font-medium truncate" style={{ color: "var(--color-ink)" }}>
+          {it.title}
+        </div>
+        {it.bidCount != null && it.bidCount > 0 && (
+          <div className="mt-0.5 text-[11px]" style={{ color: "var(--color-ink-mute)" }}>
+            {it.bidCount} bid{it.bidCount === 1 ? "" : "s"}
+          </div>
+        )}
+      </div>
+      <div className="text-right shrink-0">
+        {it.priceSek != null ? (
+          <div className="text-[14px] font-semibold tabular-nums" style={{ color: "var(--color-ink)" }}>
+            {it.priceSek.toLocaleString("sv-SE")} kr
+          </div>
+        ) : (
+          <div className="text-[12px] italic" style={{ color: "var(--color-ink-mute)" }}>
+            Make offer
+          </div>
+        )}
+        <div className="mt-0.5 inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
+          View <ExternalLink className="size-2.5" />
+        </div>
+      </div>
+    </a>
   );
 }
 
@@ -829,12 +880,4 @@ function StockBadge({ status }: { status: string }) {
       {s.label}
     </span>
   );
-}
-
-function retailerLabelFromFeedSource(feedSource: string | null): string {
-  if (!feedSource) return "retailer";
-  // tradedoubler_dustin / tradedoubler_dustin_mock → "Dustin"
-  // awin_komplett → "Komplett"
-  const slug = feedSource.split("_")[1] ?? feedSource;
-  return slug.charAt(0).toUpperCase() + slug.slice(1);
 }

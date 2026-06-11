@@ -6,6 +6,16 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const variants = await db.productVariant.findMany({
     where: { itemId: id, active: true },
     orderBy: { displayOrder: "asc" },
+    include: {
+      prices: {
+        select: {
+          retailerId: true,
+          priceOre: true,
+          stockStatus: true,
+          affiliateUrl: true,
+        },
+      },
+    },
   });
   return NextResponse.json({ variants });
 }
