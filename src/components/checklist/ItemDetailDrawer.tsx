@@ -447,15 +447,25 @@ const CONDITION_LABEL: Record<ItemCondition, string> = {
 
 function MatchCard({ match, buyerCity }: { match: MatchingListing; buyerCity?: string }) {
   const local = buyerCity != null && match.city.toLowerCase() === buyerCity.toLowerCase();
+  const [expanded, setExpanded] = useState(false);
+  const moveOut = match.moveOutDate
+    ? new Date(match.moveOutDate).toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" })
+    : null;
   return (
     <div
-      className="p-3 rounded-xl border"
+      className="rounded-xl border overflow-hidden transition-shadow"
       style={{
         background: "rgba(27, 48, 38, 0.04)",
         borderColor: "rgba(27, 48, 38, 0.2)",
+        boxShadow: expanded ? "0 4px 16px rgba(27, 48, 38, 0.12)" : undefined,
       }}
     >
-      <div className="flex items-start gap-3">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="w-full text-left p-3 flex items-start gap-3 hover:bg-black/[0.02] transition-colors"
+      >
         <div
           className="size-10 shrink-0 rounded-lg flex items-center justify-center"
           style={{ background: "rgba(27, 48, 38, 0.1)" }}
@@ -464,7 +474,10 @@ function MatchCard({ match, buyerCity }: { match: MatchingListing; buyerCity?: s
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
-            <p className="text-[13px] font-medium leading-tight truncate" style={{ color: "var(--color-ink)" }}>
+            <p
+              className={`text-[13px] font-medium leading-snug ${expanded ? "" : "truncate"}`}
+              style={{ color: "var(--color-ink)" }}
+            >
               {match.description}
             </p>
             <span
@@ -511,29 +524,52 @@ function MatchCard({ match, buyerCity }: { match: MatchingListing; buyerCity?: s
             per unit
           </div>
         </div>
-      </div>
-      <div
-        className="mt-3 pt-3 flex items-center gap-3 border-t"
-        style={{ borderColor: "rgba(27, 48, 38, 0.12)" }}
-      >
-        <a
-          href={`/sv/listings/${match.listingId}`}
-          target="_blank"
-          rel="noreferrer"
-          className="text-[11px] uppercase tracking-[0.08em] font-semibold hover:underline"
-          style={{ color: "var(--color-forest)" }}
+      </button>
+      {expanded && (
+        <div
+          className="px-3 pb-3 pt-1 border-t"
+          style={{ borderColor: "rgba(27, 48, 38, 0.12)" }}
         >
-          View full listing →
-        </a>
-        <span style={{ color: "var(--color-ink-mute)" }}>·</span>
-        <ExpressInterestButton
-          listingId={match.listingId}
-          companyName="this seller"
-          variant="ghost"
-          size="sm"
-          label="Express interest"
-        />
-      </div>
+          <dl className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+            <Detail label="Quantity" value={`${match.quantity} unit${match.quantity === 1 ? "" : "s"}`} />
+            <Detail label="Condition" value={CONDITION_LABEL[match.condition]} />
+            <Detail label="Location" value={`${match.city}${local ? " (your city)" : ""}`} />
+            <Detail label="Reason" value={match.reason.replace(/^./, (c) => c.toUpperCase())} />
+            {moveOut && <Detail label="Available from" value={moveOut} />}
+            {match.askingPriceOre != null && (
+              <Detail label="Asking price" value={`${formatSek(match.askingPriceOre)} per unit`} />
+            )}
+          </dl>
+          <div className="mt-3">
+            <ExpressInterestButton
+              listingId={match.listingId}
+              companyName="this seller"
+              variant="primary"
+              size="md"
+              label="Reach out to seller"
+            />
+          </div>
+          <p className="mt-2 text-[10px]" style={{ color: "var(--color-ink-mute)" }}>
+            We share your name + project city only after the seller confirms availability.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt
+        className="text-[9px] uppercase tracking-[0.08em] font-semibold"
+        style={{ color: "var(--color-ink-mute)" }}
+      >
+        {label}
+      </dt>
+      <dd className="mt-0.5 font-medium" style={{ color: "var(--color-ink)" }}>
+        {value}
+      </dd>
     </div>
   );
 }
