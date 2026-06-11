@@ -66,7 +66,7 @@ function serializeTemplate(t: {
     itemId: string;
     mode: "new" | "used";
     unitPrice: number;
-    item: { id: string; name: string; icon: string | null };
+    item: { id: string; name: string; icon: string | null; category: string; subcategory: string | null };
   }>;
 }) {
   return {

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { OrderStatusTimeline } from "@/components/buyer/OrderStatusTimeline";
 import { formatSek } from "@/lib/money";
 import { getTranslations } from "next-intl/server";
+import { CatalogIcon } from "@/lib/catalog-icon";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,7 +35,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       <ul style={{ listStyle: "none", padding: 0, marginTop: 16 }}>
         {order.quote.lines.map((l) => (
           <li key={l.id} style={{ display: "grid", gridTemplateColumns: "32px 1fr 60px 100px", gap: 12, padding: "8px 0", borderBottom: "1px solid var(--color-line)" }}>
-            <div style={{ fontSize: 20 }}>{l.item.icon}</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <CatalogIcon item={l.item} className="size-5" />
+            </div>
             <div>{l.item.name}</div>
             <div style={{ textAlign: "right", color: "var(--color-ink-mute)" }}>×{l.quantity}</div>
             <div style={{ textAlign: "right", fontWeight: 600 }}>{formatSek(l.lineTotal)}</div>

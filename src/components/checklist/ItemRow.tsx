@@ -1,8 +1,10 @@
 "use client";
+import { useState } from "react";
 import type { ItemCatalog, ProjectItem, ProductVariant } from "@prisma/client";
 import { formatSek } from "@/lib/money";
 import { motion } from "framer-motion";
 import { Plus, Minus, ChevronRight, ExternalLink } from "lucide-react";
+import { CatalogIcon } from "@/lib/catalog-icon";
 
 type LineWithVariant = ProjectItem & { item: ItemCatalog; variant?: ProductVariant | null };
 
@@ -29,6 +31,8 @@ export function ItemRow({
       : item.priceUsedDefault ?? item.priceNewDefault;
 
   const isActive = qty > 0;
+  const [imageBroken, setImageBroken] = useState(false);
+  const showImage = variant && !imageBroken && variant.imageUrl && !variant.imageUrl.endsWith("_placeholder.svg");
 
   return (
     <motion.div
@@ -41,22 +45,20 @@ export function ItemRow({
       }}
     >
       <div
-        className="size-14 shrink-0 rounded-lg flex items-center justify-center text-2xl overflow-hidden"
-        style={{ background: variant ? "var(--color-paper)" : "var(--color-cream)" }}
+        className="size-14 shrink-0 rounded-lg flex items-center justify-center overflow-hidden"
+        style={{ background: showImage ? "var(--color-paper)" : "var(--color-cream)" }}
         aria-hidden
       >
-        {variant ? (
+        {showImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={variant.imageUrl}
+            src={variant!.imageUrl}
             alt=""
             className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "/variants/_placeholder.svg";
-            }}
+            onError={() => setImageBroken(true)}
           />
         ) : (
-          <span>{item.icon}</span>
+          <CatalogIcon item={item} className="size-6" />
         )}
       </div>
 

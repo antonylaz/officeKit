@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { X, Check, Plus, Minus, ExternalLink, Loader2, Leaf, MapPin, ShoppingBag, Gavel } from "lucide-react";
 import { ExpressInterestButton } from "@/components/listing/ExpressInterestButton";
 import { formatSek } from "@/lib/money";
+import { CatalogIcon } from "@/lib/catalog-icon";
 import type { ItemCatalog, ProductVariant, ItemCondition } from "@prisma/client";
 
 interface TraderaItem {
@@ -256,6 +257,7 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
                       selected={state.variantId === null}
                       onSelect={() => onUpdate({ variantId: null })}
                       image={null}
+                      fallbackItem={item}
                       title={t("variantPicker.stayGeneric")}
                       subtitle={`${formatSek(state.mode === "new" ? item.priceNewDefault : item.priceUsedDefault ?? item.priceNewDefault)}`}
                     />
@@ -265,6 +267,7 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
                         selected={state.variantId === v.id}
                         onSelect={() => onUpdate({ variantId: v.id })}
                         image={v.imageUrl}
+                        fallbackItem={item}
                         title={v.name}
                         subtitle={
                           <>
@@ -533,6 +536,7 @@ interface VariantOptionProps {
   selected: boolean;
   onSelect: () => void;
   image: string | null;
+  fallbackItem: { id: string; category: string; subcategory: string | null };
   title: string;
   subtitle: React.ReactNode;
   priceNew?: number;
@@ -545,6 +549,7 @@ function VariantOption({
   selected,
   onSelect,
   image,
+  fallbackItem,
   title,
   subtitle,
   priceNew,
@@ -553,6 +558,8 @@ function VariantOption({
   traderaQuery,
 }: VariantOptionProps) {
   const t = useTranslations("variantPicker");
+  const [imageBroken, setImageBroken] = useState(false);
+  const showImage = Boolean(image) && !imageBroken && !image?.endsWith("_placeholder.svg");
   const blocketUrl = blocketQuery
     ? `https://www.blocket.se/annonser/hela_sverige?q=${encodeURIComponent(blocketQuery)}`
     : null;
@@ -574,18 +581,16 @@ function VariantOption({
         className="size-14 shrink-0 rounded-lg overflow-hidden flex items-center justify-center"
         style={{ background: "var(--color-paper)" }}
       >
-        {image ? (
+        {showImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={image}
+            src={image!}
             alt=""
             className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "/variants/_placeholder.svg";
-            }}
+            onError={() => setImageBroken(true)}
           />
         ) : (
-          <span style={{ color: "var(--color-ink-mute)", fontSize: 20 }}>—</span>
+          <CatalogIcon item={fallbackItem} className="size-6" />
         )}
       </div>
       <div className="flex-1 min-w-0">

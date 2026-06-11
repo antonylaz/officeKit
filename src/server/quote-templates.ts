@@ -19,7 +19,7 @@ export async function listSupplierTemplates(supplierId: string) {
   return db.quoteTemplate.findMany({
     where: { supplierId },
     include: {
-      lines: { include: { item: { select: { id: true, name: true, icon: true } } } },
+      lines: { include: { item: { select: { id: true, name: true, icon: true, category: true, subcategory: true } } } },
     },
     orderBy: [{ lastUsedAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
   });
