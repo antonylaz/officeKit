@@ -44,10 +44,11 @@ describe("tradera search", () => {
     expect(result).not.toBeNull();
     expect(result!.total).toBe(142);
     expect(result!.items).toHaveLength(1);
+    const first = result!.items[0]!;
     // buyItNowPrice wins over currentBid
-    expect(result!.items[0].priceSek).toBe(4500);
-    expect(result!.items[0].id).toBe("90210");
-    expect(result!.items[0].url).toBe("https://www.tradera.com/item/90210");
+    expect(first.priceSek).toBe(4500);
+    expect(first.id).toBe("90210");
+    expect(first.url).toBe("https://www.tradera.com/item/90210");
   });
 
   it("degrades to empty result on unrecognized payload (no throw)", async () => {

@@ -2,10 +2,19 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { X, Check, Plus, Minus, ExternalLink, Loader2, Leaf, MapPin } from "lucide-react";
+import { X, Check, Plus, Minus, ExternalLink, Loader2, Leaf, MapPin, ShoppingBag, Gavel } from "lucide-react";
 import { ExpressInterestButton } from "@/components/listing/ExpressInterestButton";
 import { formatSek } from "@/lib/money";
 import type { ItemCatalog, ProductVariant, ItemCondition } from "@prisma/client";
+
+interface TraderaItem {
+  id: string;
+  title: string;
+  priceSek: number | null;
+  bidCount: number | null;
+  thumbnailUrl: string | null;
+  url: string;
+}
 
 export interface DrawerState {
   variantId: string | null;
@@ -41,7 +50,9 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
   const variants = item ? variantsByItemId[item.id] ?? [] : [];
   const matching = item ? matchingByItemId[item.id] ?? [] : [];
   const loading = item != null && loadingItemId === item.id && !variantsByItemId[item.id];
-  const [traderaByVariantId, setTraderaByVariantId] = useState<Record<string, { total: number } | null>>({});
+  const [traderaByVariantId, setTraderaByVariantId] = useState<
+    Record<string, { total: number; items: TraderaItem[] } | null>
+  >({});
 
   useEffect(() => {
     if (!item || variantsByItemId[item.id]) return;
@@ -99,7 +110,8 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
 
   const selectedVariant = variants.find((v) => v.id === state.variantId) ?? null;
 
-  // Tradera live count for the *selected* variant (one fetch per variant per drawer open).
+  // Fetch real Tradera listings for the *selected* variant — the PriceRunner pattern:
+  // multiple offers with title/price/link, not just a count.
   // Falls through silently when TRADERA_APP_ID is not configured.
   useEffect(() => {
     if (!selectedVariant) return;
@@ -107,13 +119,15 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
     if (!query) return;
     if (selectedVariant.id in traderaByVariantId) return;
     let cancelled = false;
-    fetch(`/api/v1/tradera/search?q=${encodeURIComponent(query)}&limit=1`)
+    fetch(`/api/v1/tradera/search?q=${encodeURIComponent(query)}&limit=3`)
       .then((r) => r.json())
-      .then((d: { enabled: boolean; total?: number }) => {
+      .then((d: { enabled: boolean; total?: number; items?: TraderaItem[] }) => {
         if (cancelled) return;
         setTraderaByVariantId((prev) => ({
           ...prev,
-          [selectedVariant.id]: d.enabled ? { total: d.total ?? 0 } : null,
+          [selectedVariant.id]: d.enabled
+            ? { total: d.total ?? 0, items: d.items ?? [] }
+            : null,
         }));
       })
       .catch(() => {
@@ -298,26 +312,12 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
                 </section>
               )}
 
-              {/* Tradera live availability for the selected variant */}
-              {selectedVariant && traderaByVariantId[selectedVariant.id] && (
-                <section>
-                  <SectionLabel>Tradera right now</SectionLabel>
-                  <a
-                    href={`https://www.tradera.com/search?q=${encodeURIComponent(selectedVariant.traderaSearchQuery ?? selectedVariant.name)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-[13px] hover:bg-accent/30 transition-colors"
-                    style={{ borderColor: "var(--color-line)", color: "var(--color-ink)" }}
-                  >
-                    <span className="font-semibold tabular-nums">
-                      {traderaByVariantId[selectedVariant.id]?.total ?? 0}
-                    </span>
-                    <span style={{ color: "var(--color-ink-mute)" }}>
-                      live listings on Tradera
-                    </span>
-                    <ExternalLink className="size-3" style={{ color: "var(--color-ink-mute)" }} />
-                  </a>
-                </section>
+              {/* Offers — PriceRunner-style: real retailer + marketplace links */}
+              {selectedVariant && (
+                <OffersSection
+                  variant={selectedVariant}
+                  tradera={traderaByVariantId[selectedVariant.id] ?? null}
+                />
               )}
 
               {/* Mode toggle */}
@@ -647,4 +647,189 @@ function VariantOption({
       </div>
     </button>
   );
+}
+
+interface OffersSectionProps {
+  variant: ProductVariant;
+  tradera: { total: number; items: TraderaItem[] } | null;
+}
+
+function OffersSection({ variant, tradera }: OffersSectionProps) {
+  const traderaSearchUrl = `https://www.tradera.com/search?q=${encodeURIComponent(
+    variant.traderaSearchQuery ?? variant.name,
+  )}`;
+  const blocketSearchUrl = variant.blocketSearchQuery
+    ? `https://www.blocket.se/annonser/hela_sverige?q=${encodeURIComponent(variant.blocketSearchQuery)}`
+    : null;
+  const retailerName = retailerLabelFromFeedSource(variant.feedSource);
+  const stockStatus = variant.stockStatus ?? "unknown";
+
+  return (
+    <section>
+      <SectionLabel>Where to get it</SectionLabel>
+
+      {/* New — affiliate offer */}
+      {variant.affiliateUrl && (
+        <a
+          href={variant.affiliateUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="mt-3 flex items-center gap-3 p-3 rounded-xl border hover:shadow-sm transition-shadow"
+          style={{ borderColor: "var(--color-line)", background: "white" }}
+        >
+          <div
+            className="size-10 shrink-0 rounded-lg flex items-center justify-center"
+            style={{ background: "rgba(184, 66, 28, 0.1)" }}
+          >
+            <ShoppingBag className="size-4" style={{ color: "var(--color-terracotta)" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] uppercase tracking-[0.1em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
+              Buy new at {retailerName}
+            </div>
+            <div className="mt-0.5 text-[14px] font-medium truncate" style={{ color: "var(--color-ink)" }}>
+              {variant.name}
+            </div>
+            <StockBadge status={stockStatus} />
+          </div>
+          <div className="text-right shrink-0">
+            <div className="text-[14px] font-semibold tabular-nums" style={{ color: "var(--color-terracotta)" }}>
+              {formatSek(variant.priceNewOre)}
+            </div>
+            <div className="mt-0.5 inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
+              Go to store <ExternalLink className="size-2.5" />
+            </div>
+          </div>
+        </a>
+      )}
+
+      {/* Used — real Tradera listings */}
+      {tradera && tradera.items.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {tradera.items.map((it) => (
+            <a
+              key={it.id}
+              href={it.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="flex items-center gap-3 p-3 rounded-xl border hover:shadow-sm transition-shadow"
+              style={{ borderColor: "var(--color-line)", background: "white" }}
+            >
+              <div
+                className="size-10 shrink-0 rounded-lg overflow-hidden flex items-center justify-center"
+                style={{ background: "var(--color-paper)" }}
+              >
+                {it.thumbnailUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={it.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <Gavel className="size-4" style={{ color: "var(--color-ink-mute)" }} />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] uppercase tracking-[0.1em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
+                  Used · Tradera
+                </div>
+                <div className="mt-0.5 text-[13px] font-medium truncate" style={{ color: "var(--color-ink)" }}>
+                  {it.title}
+                </div>
+                {it.bidCount != null && it.bidCount > 0 && (
+                  <div className="mt-0.5 text-[11px]" style={{ color: "var(--color-ink-mute)" }}>
+                    {it.bidCount} bid{it.bidCount === 1 ? "" : "s"}
+                  </div>
+                )}
+              </div>
+              <div className="text-right shrink-0">
+                {it.priceSek != null ? (
+                  <div className="text-[14px] font-semibold tabular-nums" style={{ color: "var(--color-ink)" }}>
+                    {it.priceSek.toLocaleString("sv-SE")} kr
+                  </div>
+                ) : (
+                  <div className="text-[12px] italic" style={{ color: "var(--color-ink-mute)" }}>
+                    Make offer
+                  </div>
+                )}
+                <div className="mt-0.5 inline-flex items-center gap-0.5 text-[10px] uppercase tracking-[0.08em] font-semibold" style={{ color: "var(--color-ink-mute)" }}>
+                  View <ExternalLink className="size-2.5" />
+                </div>
+              </div>
+            </a>
+          ))}
+          {tradera.total > tradera.items.length && (
+            <a
+              href={traderaSearchUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="block text-[11px] uppercase tracking-[0.08em] font-semibold hover:underline pt-1"
+              style={{ color: "var(--color-forest)" }}
+            >
+              See all {tradera.total} on Tradera →
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Fallback search row — always show so the user has somewhere to go */}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <a
+          href={traderaSearchUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] hover:bg-accent/30 transition-colors"
+          style={{ borderColor: "var(--color-line)", color: "var(--color-ink-soft)" }}
+        >
+          Search Tradera <ExternalLink className="size-2.5" />
+        </a>
+        {blocketSearchUrl && (
+          <a
+            href={blocketSearchUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] hover:bg-accent/30 transition-colors"
+            style={{ borderColor: "var(--color-line)", color: "var(--color-ink-soft)" }}
+          >
+            Search Blocket <ExternalLink className="size-2.5" />
+          </a>
+        )}
+        {variant.manufacturerUrl && (
+          <a
+            href={variant.manufacturerUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] hover:bg-accent/30 transition-colors"
+            style={{ borderColor: "var(--color-line)", color: "var(--color-ink-soft)" }}
+          >
+            Manufacturer site <ExternalLink className="size-2.5" />
+          </a>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function StockBadge({ status }: { status: string }) {
+  if (status === "unknown") return null;
+  const styles: Record<string, { bg: string; fg: string; label: string }> = {
+    in_stock: { bg: "rgba(27, 48, 38, 0.1)", fg: "var(--color-forest)", label: "In stock" },
+    out_of_stock: { bg: "rgba(0,0,0,0.06)", fg: "var(--color-ink-mute)", label: "Out of stock" },
+    preorder: { bg: "rgba(184, 66, 28, 0.1)", fg: "var(--color-terracotta)", label: "Preorder" },
+  };
+  const s = styles[status];
+  if (!s) return null;
+  return (
+    <span
+      className="mt-1 inline-block px-1.5 py-0.5 rounded text-[9px] uppercase tracking-[0.06em] font-bold"
+      style={{ background: s.bg, color: s.fg }}
+    >
+      {s.label}
+    </span>
+  );
+}
+
+function retailerLabelFromFeedSource(feedSource: string | null): string {
+  if (!feedSource) return "retailer";
+  // tradedoubler_dustin / tradedoubler_dustin_mock → "Dustin"
+  // awin_komplett → "Komplett"
+  const slug = feedSource.split("_")[1] ?? feedSource;
+  return slug.charAt(0).toUpperCase() + slug.slice(1);
 }

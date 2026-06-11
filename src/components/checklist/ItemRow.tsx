@@ -2,7 +2,7 @@
 import type { ItemCatalog, ProjectItem, ProductVariant } from "@prisma/client";
 import { formatSek } from "@/lib/money";
 import { motion } from "framer-motion";
-import { Plus, Minus, ChevronRight } from "lucide-react";
+import { Plus, Minus, ChevronRight, ExternalLink } from "lucide-react";
 
 type LineWithVariant = ProjectItem & { item: ItemCatalog; variant?: ProductVariant | null };
 
@@ -78,6 +78,7 @@ export function ItemRow({
         >
           {item.description}
         </p>
+        {variant && qty > 0 && <RowOutboundLink variant={variant} mode={mode} />}
       </div>
 
       <div className="text-right shrink-0">
@@ -99,6 +100,49 @@ export function ItemRow({
         style={{ color: "var(--color-ink-mute)" }}
       />
     </motion.div>
+  );
+}
+
+function RowOutboundLink({ variant, mode }: { variant: ProductVariant; mode: "new" | "used" }) {
+  const link = (() => {
+    if (mode === "new") {
+      if (variant.affiliateUrl) {
+        const slug = variant.feedSource?.split("_")[1] ?? null;
+        return {
+          href: variant.affiliateUrl,
+          label: `Buy at ${slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : "retailer"}`,
+        };
+      }
+      if (variant.manufacturerUrl) return { href: variant.manufacturerUrl, label: `Buy at ${variant.manufacturer}` };
+      return null;
+    }
+    if (variant.traderaSearchQuery) {
+      return {
+        href: `https://www.tradera.com/search?q=${encodeURIComponent(variant.traderaSearchQuery)}`,
+        label: "Find on Tradera",
+      };
+    }
+    if (variant.blocketSearchQuery) {
+      return {
+        href: `https://www.blocket.se/annonser/hela_sverige?q=${encodeURIComponent(variant.blocketSearchQuery)}`,
+        label: "Find on Blocket",
+      };
+    }
+    return null;
+  })();
+  if (!link) return null;
+  return (
+    <a
+      href={link.href}
+      target="_blank"
+      rel="noreferrer noopener"
+      onClick={(e) => e.stopPropagation()}
+      className="mt-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.08em] font-semibold hover:underline"
+      style={{ color: mode === "new" ? "var(--color-terracotta)" : "var(--color-forest)" }}
+    >
+      {link.label}
+      <ExternalLink className="size-2.5" />
+    </a>
   );
 }
 
