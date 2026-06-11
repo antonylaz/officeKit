@@ -399,6 +399,13 @@ model ProductVariant {
   displayOrder          Int      @default(0) @map("display_order")
   active                Boolean  @default(true)
   sourceFeedId          String?  @map("source_feed_id")
+  /// Affiliate-program identifier: "tradedoubler_dustin", "awin_komplett", etc.
+  /// Null for manually-curated variants.
+  feedSource            String?  @map("feed_source")
+  /// Affiliate-tagged deep link to the retailer's product page
+  affiliateUrl          String?  @map("affiliate_url")
+  /// in_stock | out_of_stock | preorder | unknown
+  stockStatus           String?  @map("stock_status")
   lastSyncedAt          DateTime? @map("last_synced_at")
   projectItems          ProjectItem[]
   quoteLines            QuoteLine[]

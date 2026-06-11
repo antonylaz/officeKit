@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Mock Tradedoubler product feed for OfficeKit dev / tests.
+  Real-world structure: https://help.tradedoubler.com/hc/en-us/sections/360001870438
+  Each <product> is one SKU. The fields below are the subset we sync.
+-->
+<products>
+  <product>
+    <productId>dustin-5010962</productId>
+    <productName>Dell UltraSharp U2723QE 27" 4K USB-C-skärm</productName>
+    <description>27-tums IPS Black 4K-skärm med USB-C 90W-leverans, KVM och inbyggd hub.</description>
+    <brand>Dell</brand>
+    <sku>U2723QE</sku>
+    <category>Bildskärmar</category>
+    <price currency="SEK">6995.00</price>
+    <stockStatus>in_stock</stockStatus>
+    <imageUrl>https://www.dustin.se/image/d200001019616/dell-ultrasharp-u2723qe-27-4k-uhd-led-display.jpg</imageUrl>
+    <productUrl>https://www.dustin.se/product/5010962/u2723qe-27-4k?utm_source=tradedoubler&amp;utm_medium=affiliate&amp;tduid=OFFICEKIT</productUrl>
+    <officekitItemId>monitor-27</officekitItemId>
+  </product>
+
+  <product>
+    <productId>dustin-5010843</productId>
+    <productName>LG 27UP850N-W 27" 4K-skärm</productName>
+    <description>4K IPS-skärm med USB-C 96W-leverans, HDR400, fabriskskalibrerad.</description>
+    <brand>LG</brand>
+    <sku>27UP850N-W</sku>
+    <category>Bildskärmar</category>
+    <price currency="SEK">5990.00</price>
+    <stockStatus>in_stock</stockStatus>
+    <imageUrl>https://www.dustin.se/image/d200000922145/lg-27up850-27-4k-monitor.jpg</imageUrl>
+    <productUrl>https://www.dustin.se/product/5010843/27up850n-w?utm_source=tradedoubler&amp;utm_medium=affiliate&amp;tduid=OFFICEKIT</productUrl>
+    <officekitItemId>monitor-27</officekitItemId>
+  </product>
+
+  <product>
+    <productId>dustin-5009998</productId>
+    <productName>Jabra Evolve2 65 USB-C UC Stereo</productName>
+    <description>Trådlöst Bluetooth-headset med aktiv brusdämpning, 37 timmars batteritid.</description>
+    <brand>Jabra</brand>
+    <sku>26599-989-899</sku>
+    <category>Headsets</category>
+    <price currency="SEK">2890.00</price>
+    <stockStatus>in_stock</stockStatus>
+    <imageUrl>https://www.dustin.se/image/d200000893422/jabra-evolve2-65-usb-c-uc-stereo.jpg</imageUrl>
+    <productUrl>https://www.dustin.se/product/5009998/evolve2-65?utm_source=tradedoubler&amp;utm_medium=affiliate&amp;tduid=OFFICEKIT</productUrl>
+    <officekitItemId>headset</officekitItemId>
+  </product>
+
+  <product>
+    <productId>dustin-5008832</productId>
+    <productName>CalDigit TS4 Thunderbolt 4-docka</productName>
+    <description>18-portsdocka med 98W laddning, dubbla 4K@60 eller en 8K-skärm.</description>
+    <brand>CalDigit</brand>
+    <sku>TS4</sku>
+    <category>Dockor</category>
+    <price currency="SEK">4790.00</price>
+    <stockStatus>preorder</stockStatus>
+    <imageUrl>https://www.dustin.se/image/d200000812099/caldigit-ts4-thunderbolt-4-dock.jpg</imageUrl>
+    <productUrl>https://www.dustin.se/product/5008832/ts4-thunderbolt-4?utm_source=tradedoubler&amp;utm_medium=affiliate&amp;tduid=OFFICEKIT</productUrl>
+    <officekitItemId>dock-tb4</officekitItemId>
+  </product>
+</products>

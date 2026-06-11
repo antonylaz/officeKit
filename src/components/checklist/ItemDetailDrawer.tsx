@@ -41,6 +41,7 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
   const variants = item ? variantsByItemId[item.id] ?? [] : [];
   const matching = item ? matchingByItemId[item.id] ?? [] : [];
   const loading = item != null && loadingItemId === item.id && !variantsByItemId[item.id];
+  const [traderaByVariantId, setTraderaByVariantId] = useState<Record<string, { total: number } | null>>({});
 
   useEffect(() => {
     if (!item || variantsByItemId[item.id]) return;
@@ -97,6 +98,50 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
   }, [item, onClose]);
 
   const selectedVariant = variants.find((v) => v.id === state.variantId) ?? null;
+
+  // Tradera live count for the *selected* variant (one fetch per variant per drawer open).
+  // Falls through silently when TRADERA_APP_ID is not configured.
+  useEffect(() => {
+    if (!selectedVariant) return;
+    const query = selectedVariant.traderaSearchQuery ?? selectedVariant.name;
+    if (!query) return;
+    if (selectedVariant.id in traderaByVariantId) return;
+    let cancelled = false;
+    fetch(`/api/v1/tradera/search?q=${encodeURIComponent(query)}&limit=1`)
+      .then((r) => r.json())
+      .then((d: { enabled: boolean; total?: number }) => {
+        if (cancelled) return;
+        setTraderaByVariantId((prev) => ({
+          ...prev,
+          [selectedVariant.id]: d.enabled ? { total: d.total ?? 0 } : null,
+        }));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setTraderaByVariantId((prev) => ({ ...prev, [selectedVariant.id]: null }));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedVariant, traderaByVariantId]);
+
+  // Per-variant listing match refinement.
+  // When a specific variant is selected, narrow the resale matches to listings
+  // mentioning the variant's manufacturer or SKU. If that filter leaves zero,
+  // fall back to the full item-level list so we never hide everything.
+  const refinedMatching = (() => {
+    if (!selectedVariant || matching.length === 0) return matching;
+    const brand = selectedVariant.manufacturer.toLowerCase();
+    const sku = selectedVariant.sku?.toLowerCase();
+    const filtered = matching.filter((m) => {
+      const text = m.description.toLowerCase();
+      if (text.includes(brand)) return true;
+      if (sku && sku.length > 2 && text.includes(sku)) return true;
+      return false;
+    });
+    return filtered.length > 0 ? filtered : matching;
+  })();
+  const matchingIsRefined = selectedVariant !== null && refinedMatching.length !== matching.length;
   const unitOre = selectedVariant
     ? state.mode === "new"
       ? selectedVariant.priceNewOre
@@ -224,22 +269,54 @@ export function ItemDetailDrawer({ item, state, buyerCity, onClose, onUpdate }: 
               </section>
 
               {/* Matching resale listings */}
-              {matching.length > 0 && (
+              {refinedMatching.length > 0 && (
                 <section>
                   <SectionLabel>
                     <span className="inline-flex items-center gap-1.5">
                       <Leaf className="size-3" style={{ color: "var(--color-forest)" }} />
-                      Available used near you · {matching.length}
+                      Available used near you · {refinedMatching.length}
+                      {matchingIsRefined && (
+                        <span
+                          className="ml-1 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-[0.06em] font-bold"
+                          style={{ background: "rgba(27, 48, 38, 0.12)", color: "var(--color-forest)" }}
+                        >
+                          {selectedVariant?.manufacturer}
+                        </span>
+                      )}
                     </span>
                   </SectionLabel>
                   <p className="mt-1 text-[12px]" style={{ color: "var(--color-ink-mute)" }}>
-                    Sellers closing or downsizing offices have this item available. Reach out via OfficeKit.
+                    {matchingIsRefined
+                      ? `Filtered to listings matching ${selectedVariant?.manufacturer}. Clear the variant to see all ${matching.length}.`
+                      : "Sellers closing or downsizing offices have this item available. Reach out via OfficeKit."}
                   </p>
                   <div className="mt-3 space-y-2">
-                    {matching.slice(0, 3).map((m) => (
+                    {refinedMatching.slice(0, 3).map((m) => (
                       <MatchCard key={`${m.listingId}-${m.description}`} match={m} buyerCity={buyerCity} />
                     ))}
                   </div>
+                </section>
+              )}
+
+              {/* Tradera live availability for the selected variant */}
+              {selectedVariant && traderaByVariantId[selectedVariant.id] && (
+                <section>
+                  <SectionLabel>Tradera right now</SectionLabel>
+                  <a
+                    href={`https://www.tradera.com/search?q=${encodeURIComponent(selectedVariant.traderaSearchQuery ?? selectedVariant.name)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-[13px] hover:bg-accent/30 transition-colors"
+                    style={{ borderColor: "var(--color-line)", color: "var(--color-ink)" }}
+                  >
+                    <span className="font-semibold tabular-nums">
+                      {traderaByVariantId[selectedVariant.id]?.total ?? 0}
+                    </span>
+                    <span style={{ color: "var(--color-ink-mute)" }}>
+                      live listings on Tradera
+                    </span>
+                    <ExternalLink className="size-3" style={{ color: "var(--color-ink-mute)" }} />
+                  </a>
                 </section>
               )}
 
