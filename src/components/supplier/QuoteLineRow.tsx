@@ -2,6 +2,7 @@
 import type { QuoteLine, ItemCatalog, ProductVariant } from "@prisma/client";
 import { Trash2 } from "lucide-react";
 import { fromSek, toSek } from "@/lib/money";
+import { CatalogIcon } from "@/lib/catalog-icon";
 
 export function QuoteLineRow({
   line,
@@ -36,9 +37,7 @@ export function QuoteLineRow({
             }}
           />
         ) : (
-          <span className="text-xl" aria-hidden>
-            {line.item.icon}
-          </span>
+          <CatalogIcon item={line.item} className="size-5" />
         )}
       </div>
 

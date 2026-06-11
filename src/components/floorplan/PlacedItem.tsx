@@ -2,6 +2,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import type { PlacedItem as P } from "./state";
 import type { ItemCatalog } from "@prisma/client";
+import { CatalogIcon } from "@/lib/catalog-icon";
 
 export function PlacedItemNode({ placed, item, cellPx, selected, onSelect }: { placed: P; item: ItemCatalog; cellPx: number; selected: boolean; onSelect: () => void }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: `placed:${placed.uid}` });
@@ -32,7 +33,8 @@ export function PlacedItemNode({ placed, item, cellPx, selected, onSelect }: { p
       {...listeners}
       onClick={(e) => { e.stopPropagation(); onSelect(); }}
     >
-      {item.icon} <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</span>
+      <CatalogIcon item={item} className="size-3.5" />
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</span>
     </div>
   );
 }

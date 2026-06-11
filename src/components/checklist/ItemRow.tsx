@@ -1,8 +1,10 @@
 "use client";
+import { useState } from "react";
 import type { ItemCatalog, ProjectItem, ProductVariant } from "@prisma/client";
 import { formatSek } from "@/lib/money";
 import { motion } from "framer-motion";
-import { Plus, Minus, ChevronRight } from "lucide-react";
+import { Plus, Minus, ChevronRight, ExternalLink } from "lucide-react";
+import { CatalogIcon } from "@/lib/catalog-icon";
 
 type LineWithVariant = ProjectItem & { item: ItemCatalog; variant?: ProductVariant | null };
 
@@ -29,6 +31,8 @@ export function ItemRow({
       : item.priceUsedDefault ?? item.priceNewDefault;
 
   const isActive = qty > 0;
+  const [imageBroken, setImageBroken] = useState(false);
+  const showImage = variant && !imageBroken && variant.imageUrl && !variant.imageUrl.endsWith("_placeholder.svg");
 
   return (
     <motion.div
@@ -41,22 +45,20 @@ export function ItemRow({
       }}
     >
       <div
-        className="size-14 shrink-0 rounded-lg flex items-center justify-center text-2xl overflow-hidden"
-        style={{ background: variant ? "var(--color-paper)" : "var(--color-cream)" }}
+        className="size-14 shrink-0 rounded-lg flex items-center justify-center overflow-hidden"
+        style={{ background: showImage ? "var(--color-paper)" : "var(--color-cream)" }}
         aria-hidden
       >
-        {variant ? (
+        {showImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={variant.imageUrl}
+            src={variant!.imageUrl}
             alt=""
             className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "/variants/_placeholder.svg";
-            }}
+            onError={() => setImageBroken(true)}
           />
         ) : (
-          <span>{item.icon}</span>
+          <CatalogIcon item={item} className="size-6" />
         )}
       </div>
 
@@ -78,6 +80,7 @@ export function ItemRow({
         >
           {item.description}
         </p>
+        {variant && qty > 0 && <RowOutboundLink variant={variant} mode={mode} />}
       </div>
 
       <div className="text-right shrink-0">
@@ -99,6 +102,49 @@ export function ItemRow({
         style={{ color: "var(--color-ink-mute)" }}
       />
     </motion.div>
+  );
+}
+
+function RowOutboundLink({ variant, mode }: { variant: ProductVariant; mode: "new" | "used" }) {
+  const link = (() => {
+    if (mode === "new") {
+      if (variant.affiliateUrl) {
+        const slug = variant.feedSource?.split("_")[1] ?? null;
+        return {
+          href: variant.affiliateUrl,
+          label: `Buy at ${slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : "retailer"}`,
+        };
+      }
+      if (variant.manufacturerUrl) return { href: variant.manufacturerUrl, label: `Buy at ${variant.manufacturer}` };
+      return null;
+    }
+    if (variant.traderaSearchQuery) {
+      return {
+        href: `https://www.tradera.com/search?q=${encodeURIComponent(variant.traderaSearchQuery)}`,
+        label: "Find on Tradera",
+      };
+    }
+    if (variant.blocketSearchQuery) {
+      return {
+        href: `https://www.blocket.se/annonser/hela_sverige?q=${encodeURIComponent(variant.blocketSearchQuery)}`,
+        label: "Find on Blocket",
+      };
+    }
+    return null;
+  })();
+  if (!link) return null;
+  return (
+    <a
+      href={link.href}
+      target="_blank"
+      rel="noreferrer noopener"
+      onClick={(e) => e.stopPropagation()}
+      className="mt-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.08em] font-semibold hover:underline"
+      style={{ color: mode === "new" ? "var(--color-terracotta)" : "var(--color-forest)" }}
+    >
+      {link.label}
+      <ExternalLink className="size-2.5" />
+    </a>
   );
 }
 

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Trash2, Loader2, Calendar, Hash, Package } from "lucide-react";
 import { toSek } from "@/lib/money";
+import { CatalogIcon } from "@/lib/catalog-icon";
 
 interface Template {
   id: string;
@@ -18,7 +19,7 @@ interface Template {
     itemId: string;
     mode: "new" | "used";
     unitPrice: number;
-    item: { id: string; name: string; icon: string | null };
+    item: { id: string; name: string; icon: string | null; category: string; subcategory: string | null };
   }>;
 }
 
@@ -135,7 +136,7 @@ export function TemplateList({ templates }: { templates: Template[] }) {
                               style={{ borderColor: "var(--color-line)" }}
                             >
                               <td className="py-2 inline-flex items-center gap-2">
-                                <span className="text-lg">{l.item.icon}</span>
+                                <CatalogIcon item={l.item} className="size-4" />
                                 <span>{l.item.name}</span>
                               </td>
                               <td className="py-2 lowercase">{l.mode}</td>

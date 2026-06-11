@@ -226,7 +226,7 @@ export function ChecklistView({
       </div>
 
       <div className="sticky top-8 self-start">
-        <SummarySidebar summary={summary} city={project.city} />
+        <SummarySidebar summary={summary} city={project.city} lines={items} />
         <Link
           href={`/projects/${project.id}/floorplan`}
           className="mt-4 inline-flex w-full items-center justify-center gap-2 px-6 py-4 rounded-lg text-white text-xs uppercase tracking-[0.12em] font-semibold shadow-md hover:shadow-lg transition-shadow"

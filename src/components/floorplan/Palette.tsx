@@ -4,6 +4,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { Search } from "lucide-react";
 import type { ItemCatalog, ProjectItem } from "@prisma/client";
 import type { PlacedItem } from "./state";
+import { CatalogIcon } from "@/lib/catalog-icon";
 
 interface PaletteProps {
   projectItems: (ProjectItem & { item: ItemCatalog })[];
@@ -127,7 +128,7 @@ function PaletteChip({ item, placed, total }: { item: ItemCatalog; placed: numbe
       }}
       aria-label={`${item.name}: ${placed} of ${total} placed`}
     >
-      <span aria-hidden>{item.icon}</span>
+      <CatalogIcon item={item} className="size-5" />
 
       {/* Count badge */}
       <span

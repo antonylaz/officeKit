@@ -3,5 +3,10 @@
   "buildCommand": "prisma migrate deploy && next build",
   "framework": "nextjs",
   "regions": ["arn1"],
-  "crons": []
+  "crons": [
+    {
+      "path": "/api/v1/cron/sync-feeds",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }

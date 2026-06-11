@@ -63,6 +63,10 @@ const optional = [
   { key: "NEXT_PUBLIC_POSTHOG_KEY", hint: "Funnel analytics" },
   { key: "UPSTASH_REDIS_REST_URL", hint: "Rate limits — falls back to in-memory when unset" },
   { key: "UPSTASH_REDIS_REST_TOKEN" },
+  { key: "TRADERA_APP_ID", hint: "Live second-hand counts in variant drawer — chip hides when unset" },
+  { key: "TRADERA_APP_KEY", hint: "Optional second header some Tradera plans require" },
+  { key: "AFFILIATE_FEEDS", hint: "JSON array of {feedSource, retailerId, url} for the nightly price sync" },
+  { key: "CRON_SECRET", hint: "Vercel-managed; required only if calling /api/v1/cron/sync-feeds manually" },
 ];
 
 function check(group: { key: string; hint?: string }[], tier: "required" | "recommended" | "optional"): Check[] {
